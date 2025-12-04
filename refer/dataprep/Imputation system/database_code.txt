@@ -1,7 +1,0 @@
-//新建一个semi数据库
-drop database if exists semi;
-create database semi;
-
-use semi;
-
-//之后使用database.py中的csv_to_database函数将csv中的数据写入数据库
