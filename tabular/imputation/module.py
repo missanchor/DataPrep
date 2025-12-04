@@ -8,11 +8,12 @@ import os
 # =============================================================================
 
 def normalization(data, parameters=None):
-    """归一化数据到 [0, 1]"""
+    '''Normalize data in [0, 1] range.'''
     _, dim = data.shape
     norm_data = data.copy()
 
     if parameters is None:
+        # 训练阶段：计算 min/max
         min_val = np.zeros(dim)
         max_val = np.zeros(dim)
         for i in range(dim):
@@ -20,13 +21,19 @@ def normalization(data, parameters=None):
             norm_data[:, i] = norm_data[:, i] - np.nanmin(norm_data[:, i])
             max_val[i] = np.nanmax(norm_data[:, i])
             norm_data[:, i] = norm_data[:, i] / (np.nanmax(norm_data[:, i]) + 1e-6)
+
         norm_parameters = {'min_val': min_val, 'max_val': max_val}
+
     else:
+        # 预测阶段：使用已有的 min/max
         min_val = parameters['min_val']
         max_val = parameters['max_val']
         for i in range(dim):
             norm_data[:, i] = norm_data[:, i] - min_val[i]
             norm_data[:, i] = norm_data[:, i] / (max_val[i] + 1e-6)
+
+        # 【关键修复】加上这一行，把传入的 parameters 赋给返回值变量
+        norm_parameters = parameters
 
     return norm_data, norm_parameters
 
@@ -82,29 +89,51 @@ def uniform_sampler(low, high, rows, cols):
 # =============================================================================
 # 3. 核心计算组件 (Network & Loss)
 # =============================================================================
+def cost_matrix(x, y, m, p=2):
+    """
+    计算代价矩阵 C_{ij} = |x_i - y_j|^p
+    """
+    x_col = tf.expand_dims(x, 1)  # [Batch, 1, Dim]
+    m_x_col = tf.expand_dims(m, 1)  # [Batch, 1, Dim]
+    y_lin = tf.expand_dims(y, 0)  # [1, Batch, Dim]
+    m_y_lin = tf.expand_dims(m, 0)  # [1, Batch, Dim]
+
+    # 广播计算差异，结果形状 [Batch, Batch]
+    c = tf.reduce_sum((tf.abs(x_col * m_x_col - y_lin * m_y_lin)) ** p, axis=2)
+    return c
+
 
 def sinkhorn_loss(x, y, m, epsilon, n, niter=20, p=2):
-    """计算 Sinkhorn 距离损失"""
-    # Cost matrix
-    x_col = tf.expand_dims(x, 1)
-    m_x_col = tf.expand_dims(m, 1)
-    y_lin = tf.expand_dims(y, 0)
-    m_y_lin = tf.expand_dims(m, 0)
-    C = tf.reduce_sum((tf.abs(x_col * m_x_col - y_lin * m_y_lin)) ** p, axis=2)
+    C = cost_matrix(x, y, m, p=p)  # C shape is [Batch, Batch]
 
-    mu = tf.constant(1.0 / n, shape=[n])
-    nu = tf.constant(1.0 / n, shape=[n])
+    # 获取动态 Batch Size
+    # 在 TF 1.x 中，我们需要用 tf.shape(C)[0] 来获取运行时的 batch size
+    batch_size_dynamic = tf.cast(tf.shape(C)[0], tf.float32)
+
+    # 构造 mu 和 nu，形状为 [Batch, 1] 以便后续广播
+    mu = tf.fill([tf.shape(C)[0], 1], 1.0 / batch_size_dynamic)
+    nu = tf.fill([tf.shape(C)[0], 1], 1.0 / batch_size_dynamic)
 
     def M(u, v):
-        return (-C + tf.expand_dims(u, 1) + tf.expand_dims(v, 0)) / epsilon
+        # M 计算: (-C + u + v.T) / epsilon
+        # C: [B, B]
+        # u: [B, 1] -> 广播到 [B, B] (每一列都一样)
+        # v: [B, 1] -> 转置后 [1, B] -> 广播到 [B, B] (每一行都一样)
+        return (-C + u + tf.transpose(v)) / epsilon
 
     def lse(A):
         return tf.reduce_logsumexp(A, axis=1, keepdims=True)
 
-    u, v = 0. * mu, 0. * nu
+    u = tf.zeros_like(mu)
+    v = tf.zeros_like(nu)
+
     for i in range(niter):
-        u = epsilon * (tf.math.log(mu) - tf.squeeze(lse(M(u, v)))) + u
-        v = epsilon * (tf.math.log(nu) - tf.squeeze(lse(tf.transpose(M(u, v))))) + v
+        # Sinkhorn Iteration
+        # u = epsilon * (log(mu) - lse(M(u, v))) + u
+        u = epsilon * (tf.math.log(mu) - lse(M(u, v))) + u
+
+        # v = epsilon * (log(nu) - lse(M(u, v).T)) + v
+        v = epsilon * (tf.math.log(nu) - lse(tf.transpose(M(u, v)))) + v
 
     pi = tf.exp(M(u, v))
     cost = tf.reduce_sum(pi * C)
