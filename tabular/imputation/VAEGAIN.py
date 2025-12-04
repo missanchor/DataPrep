@@ -5,10 +5,10 @@ from tqdm import tqdm
 import time
 
 from dataprep.tabular.imputation import module
-from dataprep.base import BaseEstimator
+from dataprep.tabular.imputation.base import Imputation_Estimator
 
 
-class VAEGAIN(BaseEstimator):
+class VAEGAIN(Imputation_Estimator):
     def __init__(self, batch_size=8, hint_rate=0.9, alpha=10, learning_rate=0.002,
                  epochs=5000,
                  encoder_h1=50, encoder_h2=20,
@@ -41,7 +41,7 @@ class VAEGAIN(BaseEstimator):
         """
         训练模型
         Args:
-            data: DataFrame or Numpy Array, 含有缺失值
+            data: DataFrame or Numpy Array
         """
         start_time = time.time()
 
@@ -79,8 +79,6 @@ class VAEGAIN(BaseEstimator):
         losses = self.graph['losses']
 
         # 4. 训练循环
-        # 注意：原代码的Epoch定义其实是Iteration (range(5000))
-        # 这里的 epochs 参数对应原代码的迭代次数
         pbar = tqdm(range(self.params['epochs']), desc="VAE-GAIN Training")
 
         for _ in pbar:
@@ -121,7 +119,7 @@ class VAEGAIN(BaseEstimator):
         if not self.is_trained_:
             raise RuntimeError("Train first.")
 
-        # 自动恢复 Session (如果在加载模型后)
+        # 自动恢复 Session (在加载模型后)
         if self.sess is None:
             data_dim = np.array(data).shape[1]
             self._restore_session_from_weights(data_dim)
@@ -141,12 +139,11 @@ class VAEGAIN(BaseEstimator):
         no, dim = data.shape
         data_m = 1 - np.isnan(data)
 
-        # 归一化 (使用训练时的参数)
+        # 归一化
         norm_data, _ = module.normalization(data, self.norm_parameters)
         norm_data_x = np.nan_to_num(norm_data, 0)
 
         # 2. 全量生成
-        # 原逻辑：New_Data_mb = M_mb * X_mb + (1 - M_mb) * Data_Z_mb
         Data_Z_mb = module.uniform_sampler(0, 0.01, no, dim)
         New_Data_mb = data_m * norm_data_x + (1 - data_m) * Data_Z_mb
 
@@ -165,22 +162,8 @@ class VAEGAIN(BaseEstimator):
         return imputed_data
 
     # ==========================================
-    # 序列化支持 (BaseEstimator 兼容)
+    # 序列化支持
     # ==========================================
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        if self.sess is not None:
-            vars_list = tf.compat.v1.global_variables()
-            vars_vals = self.sess.run(vars_list)
-            state['saved_weights_'] = {v.name: val for v, val in zip(vars_list, vars_vals)}
-        if 'sess' in state: del state['sess']
-        if 'graph' in state: del state['graph']
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        self.sess = None
-        self.graph = None
 
     def _restore_session_from_weights(self, dim):
         print("Restoring VAE-GAIN from saved weights...")

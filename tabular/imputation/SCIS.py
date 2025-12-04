@@ -3,10 +3,10 @@ import numpy as np
 from tqdm import tqdm
 import time
 from dataprep.tabular.imputation import module
-from dataprep.base import BaseEstimator
+from dataprep.tabular.imputation.base import Imputation_Estimator
 
 
-class SCIS(BaseEstimator):
+class SCIS(Imputation_Estimator):
     def __init__(self, batch_size=128, hint_rate=0.9, alpha=10,
                  epochs=1, guarantee=0.95, epsilon=1.4, value=2,
                  initial_num=20000, thre_value=0.001, gpu_device='2', **kwargs):
@@ -80,7 +80,6 @@ class SCIS(BaseEstimator):
 
         # 自动恢复 Session
         if self.sess is None:
-            # 注意：重建图时 dummy 参数 (如 total_len) 不影响 Generator 推理，给 0 即可
             self._restore_session_from_weights(np.array(data).shape[1])
 
         data = np.array(data)
@@ -152,21 +151,6 @@ class SCIS(BaseEstimator):
     # ==========================================
     # 序列化支持
     # ==========================================
-    def __getstate__(self):
-        state = self.__dict__.copy()
-        if self.sess is not None:
-            vars_list = tf.compat.v1.global_variables()
-            vars_vals = self.sess.run(vars_list)
-            state['saved_weights_'] = {v.name: val for v, val in zip(vars_list, vars_vals)}
-        del state['sess']
-        del state['graph']
-        return state
-
-    def __setstate__(self, state):
-        self.__dict__.update(state)
-        self.sess = None
-        self.graph = None
-
     def _restore_session_from_weights(self, dim):
         print("Restoring SCIS from saved weights...")
         # 重建图

@@ -3,10 +3,10 @@ import numpy as np
 from tqdm import tqdm
 import time
 from dataprep.tabular.imputation import module
-from dataprep.base import BaseEstimator
+from dataprep.tabular.imputation.base import Imputation_Estimator
 
 
-class GAIN(BaseEstimator):
+class GAIN(Imputation_Estimator):
     def __init__(self, batch_size=128, hint_rate=0.9, alpha=10,
                  epochs=100, epsilon=1.4, value=2,
                  gpu_device='0', **kwargs):
@@ -104,28 +104,6 @@ class GAIN(BaseEstimator):
     # ==========================================
     # 序列化支持 (解决 joblib 保存 TF Session 问题)
     # ==========================================
-
-    def __getstate__(self):
-        """joblib.dump 时调用：将 TF 变量提取为 numpy 保存，并移除 session"""
-        state = self.__dict__.copy()
-        if self.sess is not None:
-            # 获取所有变量的值
-            vars_list = tf.compat.v1.global_variables()
-            vars_vals = self.sess.run(vars_list)
-            # 保存 变量名 -> numpy数组 的映射
-            state['saved_weights_'] = {v.name: val for v, val in zip(vars_list, vars_vals)}
-
-        # 移除不可序列化的 TF 对象
-        del state['sess']
-        del state['graph']
-        return state
-
-    def __setstate__(self, state):
-        """joblib.load 时调用：恢复参数，但 Session 仍为 None (将在 predict 时重建)"""
-        self.__dict__.update(state)
-        self.sess = None
-        self.graph = None
-
     def _restore_session_from_weights(self, dim):
         """从保存的 numpy 权重重建 TF 图和 Session"""
         print("Restoring TensorFlow graph from saved weights...")
