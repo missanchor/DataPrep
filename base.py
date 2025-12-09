@@ -43,3 +43,5 @@ class BaseEstimator(ABC):
         model = joblib.load(path)
         print(f"Model loaded from {path}")
         return model
+
+    # estimate

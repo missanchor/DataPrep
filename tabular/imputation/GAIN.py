@@ -1,125 +1,106 @@
-import tensorflow as tf
 import numpy as np
-from tqdm import tqdm
-import time
-from dataprep.tabular.imputation import module
-from dataprep.tabular.imputation.base import Imputation_Estimator
+import torch
+from dataprep.base import BaseEstimator
+import dataprep.tabular.imputation.GAIN_module as gm
 
+class GAINImputer(BaseEstimator):
+    def __init__(self,
+                 batch_size=128,
+                 hint_rate=0.9,
+                 alpha=100,
+                 epoch=100,
+                 device=None):
+        self.batch_size = batch_size
+        self.hint_rate = hint_rate
+        self.alpha = alpha
+        self.epoch = epoch
+        self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
 
-class GAIN(Imputation_Estimator):
-    def __init__(self, batch_size=128, hint_rate=0.9, alpha=10,
-                 epochs=100, epsilon=1.4, value=2,
-                 gpu_device='0', **kwargs):
-        self.params = {
-            'batch_size': batch_size, 'hint_rate': hint_rate, 'alpha': alpha,
-            'epochs': epochs, 'epsilon': epsilon, 'value': value,
-            'gpu_device': gpu_device
-        }
-        self.is_trained_ = False
-        self.sess = None
+        # 内部状态
         self.norm_parameters = None
-        self.graph = None
-        # 保存序列化后的权重
-        self.saved_weights_ = {}
+        self.generator = None
+        self.discriminator = None
 
-
-    def train(self, data, missing_mask=None, **kwargs):
-        start_time = time.time()
-
-        # 1. 数据预处理
+    def train(self, data, missing_mask):
+        """
+        Args:
+            data: np.array, 包含数据的矩阵 (可以包含 NaN，也可以是已经填0的，依据 mask)
+            missing_mask: np.array, 0表示缺失, 1表示观测到 (与 data 形状相同)
+        """
         data = np.array(data)
+        missing_mask = np.array(missing_mask)
         no, dim = data.shape
-        if missing_mask is None: missing_mask = 1 - np.isnan(data)
+        h_dim = int(dim)
 
-        norm_data, self.norm_parameters = module.normalization(data)
+        # 1. 数据归一化 (使用 module 中的函数)
+        data_for_norm = data.copy()
+        data_for_norm[missing_mask == 0] = np.nan
+        norm_data, self.norm_parameters = gm.normalization(data_for_norm)
+
+        # 将 NaN 填为 0 以输入网络
         norm_data_x = np.nan_to_num(norm_data, 0)
-        data_m = np.array(missing_mask)
 
-        # 2. 构建计算图
-        self.graph = module.build_gain_graph(dim, self.params['batch_size'],
-                                             self.params['epsilon'], self.params['value'],
-                                             self.params['gpu_device'])
+        # 2. 初始化网络
+        self.generator = gm.GainGenerator(dim, h_dim).to(self.device)
+        self.discriminator = gm.GainDiscriminator(dim, h_dim).to(self.device)
 
-        # 3. 训练循环
-        self.sess = tf.compat.v1.Session()
-        self.sess.run(tf.compat.v1.global_variables_initializer())
+        # 3. 调用 Module 中的训练循环
+        params = {
+            'batch_size': self.batch_size,
+            'epoch': self.epoch,
+            'hint_rate': self.hint_rate,
+            'alpha': self.alpha
+        }
 
-        ph, ops = self.graph['ph'], self.graph['ops']
-
-        pbar = tqdm(range(self.params['epochs']), desc="GAIN Training")
-        for _ in pbar:
-            idx_list = module.sample_batch_index(no, no)
-            avg_mse = 0
-            count = 0
-
-            for i in range(0, len(idx_list), self.params['batch_size']):
-                mb_idx = idx_list[i:i + self.params['batch_size']]
-                if len(mb_idx) == 0: continue
-
-                X_mb = norm_data_x[mb_idx, :]
-                M_mb = data_m[mb_idx, :]
-                Z_mb = module.uniform_sampler(0, 0.01, len(mb_idx), dim)
-                H_mb = M_mb * module.binary_sampler(self.params['hint_rate'], len(mb_idx), dim)
-                X_mb_in = M_mb * X_mb + (1 - M_mb) * Z_mb
-
-                fd = {ph['X']: X_mb_in, ph['M']: M_mb, ph['H']: H_mb}
-
-                self.sess.run(ops['D_solver'], feed_dict=fd)
-                self.sess.run(ops['clip_d_op'])
-                _, mse = self.sess.run([ops['G_solver'], self.graph['losses']['MSE']], feed_dict=fd)
-                avg_mse += mse
-                count += 1
-
-            if count > 0: pbar.set_description(f"GAIN Epoch MSE: {avg_mse / count:.4f}")
-
-        self.is_trained_ = True
-        print(f"GAIN Training finished. Time: {time.time() - start_time:.2f}s")
+        print(f"Starting GAIN training on {self.device}...")
+        gm.train_gain_model(
+            self.generator,
+            self.discriminator,
+            norm_data_x,
+            missing_mask,
+            params,
+            self.device
+        )
+        print("Training finished.")
         return self
 
-    def predict(self, data, **kwargs):
-        if not self.is_trained_:
-            raise RuntimeError("This GAIN instance is not trained yet. Call 'train' with appropriate data before using 'predict'.")
+    def predict(self, data):
+        """
+        Args:
+            data: 原始数据
+            missing_mask: 0表示缺失, 1表示观测到
+        Returns:
+            imputed_data: 填补后的完整数据
+        """
+        if self.generator is None:
+            raise RuntimeError("Model needs to be trained first.")
 
-        # 自动恢复 Session
-        if self.sess is None:
-            self._restore_session_from_weights(np.array(data).shape[1])
-
+        self.generator.eval()
         data = np.array(data)
+        missing_mask = 1 - np.isnan(data)
         no, dim = data.shape
-        data_m = 1 - np.isnan(data)
 
-        norm_data, _ = module.normalization(data, self.norm_parameters)
-        norm_data_x = np.nan_to_num(norm_data, 0)
+        # 1. 归一化
+        # 使用训练时保存的参数
+        norm_data = gm.normalization_with_parameter(data, self.norm_parameters)
+        norm_data_x = np.nan_to_num(norm_data, 0)  # 缺失处填0
 
-        Z_mb = module.uniform_sampler(0, 0.01, no, dim)
-        X_mb = data_m * norm_data_x + (1 - data_m) * Z_mb
+        # 2. 准备输入
+        Z_mb = gm.uniform_sampler(0, 0.01, no, dim)
+        M_mb = missing_mask
+        X_mb = M_mb * norm_data_x + (1 - M_mb) * Z_mb
 
-        imputed_norm = self.sess.run(self.graph['ops']['G_sample'],
-                                     feed_dict={self.graph['ph']['X']: X_mb, self.graph['ph']['M']: data_m})[0]
+        X_mb_torch = torch.tensor(X_mb, dtype=torch.float32).to(self.device)
+        M_mb_torch = torch.tensor(M_mb, dtype=torch.float32).to(self.device)
 
-        imputed_final = data_m * norm_data_x + (1 - data_m) * imputed_norm
-        imputed_data = module.renormalization(imputed_final, self.norm_parameters)
-        return module.rounding(imputed_data, data)
+        # 3. 生成填补值
+        with torch.no_grad():
+            imputed_norm = self.generator(X_mb_torch, M_mb_torch).cpu().numpy()
 
-    # ==========================================
-    # 序列化支持 (解决 joblib 保存 TF Session 问题)
-    # ==========================================
-    def _restore_session_from_weights(self, dim):
-        """从保存的 numpy 权重重建 TF 图和 Session"""
-        print("Restoring TensorFlow graph from saved weights...")
-        # 1. 重建图结构
-        self.graph = module.build_gain_graph(dim, self.params['batch_size'],
-                                             self.params['epsilon'], self.params['value'],
-                                             self.params['gpu_device'])
-        # 2. 启动 Session
-        self.sess = tf.compat.v1.Session()
-        self.sess.run(tf.compat.v1.global_variables_initializer())
+        # 4. 组合观测值与生成值
+        imputed_data_norm = M_mb * norm_data_x + (1 - M_mb) * imputed_norm
 
-        # 3. 将保存的权重赋值回 TF 变量
-        all_vars = tf.compat.v1.global_variables()
-        assign_ops = []
-        for v in all_vars:
-            if v.name in self.saved_weights_:
-                assign_ops.append(tf.compat.v1.assign(v, self.saved_weights_[v.name]))
+        # 5. 反归一化
+        imputed_data = gm.renormalization(imputed_data_norm, self.norm_parameters)
 
-        self.sess.run(assign_ops)
+        return imputed_data
