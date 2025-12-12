@@ -1,9 +1,9 @@
 import numpy as np
 import torch
 import dataprep.tabular.imputation.SCIS_module as sm
-from dataprep.base import BaseEstimator
+from dataprep.tabular.imputation.base import BaseImputer
 
-class SCISImputer(BaseEstimator):
+class SCIS(BaseImputer):
     def __init__(self,
                  batch_size=128,
                  hint_rate=0.9,
@@ -31,13 +31,14 @@ class SCISImputer(BaseEstimator):
         self.generator = None
         self.discriminator = None
 
-    def train(self, data, missing_mask):
+    def train(self, data: np.ndarray, missing_mask: np.ndarray) -> 'SCIS':
         """
         训练 SCIS 模型。
         Args:
             data: np.array, 原始数据
             missing_mask: np.array, 0表示缺失, 1表示观测到
         """
+        self._create_temp_dir(prefix="scis_train_")
         data = np.array(data)
         missing_mask = np.array(missing_mask)
         no, dim = data.shape
@@ -75,10 +76,12 @@ class SCISImputer(BaseEstimator):
             params,
             self.device
         )
-        print("Training finished.")
+        self._save_checkpoint("scis_imputer_complete.pkl")
+
+        print("Training finished and parameters saved to temp dir.")
         return self
 
-    def predict(self, data):
+    def predict(self, data: np.ndarray) -> np.ndarray:
         """
         预测/填补数据。
         """

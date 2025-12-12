@@ -1,10 +1,10 @@
-# dataprep/base.py
 from abc import ABC, abstractmethod
 import joblib  # 或者使⽤ pickle/cloudpickle
-
+import tempfile
+import shutil
+import os
 
 class BaseEstimator(ABC):
-
 
     @abstractmethod
     def train(self, *args, **kwargs):
@@ -22,6 +22,7 @@ class BaseEstimator(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
     def train_and_predict(self, *args, **kwargs):
         """先训练，后转换。"""
         # 注意：这⾥的参数传递需要更精细的设计，或者假设train和predict的输⼊参数有重叠
@@ -44,4 +45,32 @@ class BaseEstimator(ABC):
         print(f"Model loaded from {path}")
         return model
 
-    # estimate
+    def _create_temp_dir(self, prefix="model_run_"):
+        """
+        创建一个唯一的临时目录。
+        prefix: 目录的前缀，方便识别 (例如 'gain_', 'scis_')
+        """
+        self.temp_dir = tempfile.mkdtemp(prefix=prefix)
+        print(f"[System] Temporary checkpoint directory created at: {self.temp_dir}")
+        return self.temp_dir
+
+    def _save_checkpoint(self, filename="checkpoint.pth"):
+        """
+        将当前对象(模型)保存到临时目录中。
+        """
+        if self.temp_dir is None:
+            raise RuntimeError("Temporary directory not created. Call _create_temp_dir first.")
+
+        save_path = os.path.join(self.temp_dir, filename)
+        self.save_model(save_path)
+        return save_path
+
+    def cleanup(self):
+        """
+        训练结束后清理临时目录
+        """
+        if self.temp_dir and os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+            print(f"[System] Cleaned up temporary directory: {self.temp_dir}")
+            self.temp_dir = None
+

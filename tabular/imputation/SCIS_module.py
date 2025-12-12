@@ -200,6 +200,7 @@ def train_scis_algorithm(generator, discriminator, data_x, mask, params, device)
                     rmse_n = torch.sqrt(
                         torch.mean((m_val * x_val - m_val * generator.forward_with_params(x_in, m_val, p_n)) ** 2))
                     if abs(rmse_n - rmse_N) < params['thre_value']: predict_within += 1
+                    print(f"Diff: {abs(rmse_n - rmse_N).item():.4f}, Threshold: {params['thre_value']}")
 
             if predict_within > params['guarantee'] * 20:
                 up_num = median_num

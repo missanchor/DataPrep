@@ -1,9 +1,9 @@
 import numpy as np
 import torch
-from dataprep.base import BaseEstimator
+from dataprep.tabular.imputation.base import BaseImputer
 import dataprep.tabular.imputation.VAEGAIN_module as vm
 
-class VAEGAINImputer(BaseEstimator):
+class VAEGAIN(BaseImputer):
     def __init__(self,
                  batch_size=8,
                  hint_rate=0.9,
@@ -26,17 +26,16 @@ class VAEGAINImputer(BaseEstimator):
         self.decoder = None
         self.discriminator = None
 
-    def train(self, data):
+    def train(self, data: np.ndarray, missing_mask: np.ndarray) -> 'VAEGAIN':
         """
         Args:
             data: np.array, 原始数据 (包含 NaN)
         """
+        self._create_temp_dir(prefix="vaegain_train_")
         data = np.array(data)
-        # 自动生成 Mask: 1=Observed, 0=Missing
-        missing_mask = 1 - np.isnan(data)
         no, dim = data.shape
 
-        # 1. 数据归一化 (NaN处理：归一化前不处理NaN，归一化后NaN填0)
+        # 1. 数据归一化
         norm_data, self.norm_parameters = vm.normalization(data)
         norm_data_x = np.nan_to_num(norm_data, 0)
 
@@ -48,13 +47,13 @@ class VAEGAINImputer(BaseEstimator):
         # 3. 初始化网络
         self.encoder = vm.Encoder(dim, enc_h1, enc_h2, self.latent_size).to(self.device)
         self.decoder = vm.Decoder(self.latent_size, dec_h1, dec_h2, dim).to(self.device)
-        self.discriminator = vm.Discriminator(dim, enc_h1, enc_h2).to(self.device)  # 原代码D的隐层大小复用了Encoder的配置
+        self.discriminator = vm.Discriminator(dim, enc_h1, enc_h2).to(self.device)
 
         # 4. 准备参数并训练
         params = {
             'batch_size': self.batch_size,
             'epoch': self.epoch,
-            'p_hint': self.hint_rate,  # 注意：原代码是 p_hint，这里为了接口统一可以叫 hint_rate
+            'p_hint': self.hint_rate,
             'alpha': self.alpha,
             'learning_rate': self.learning_rate,
             'discriminator_number': 1,
@@ -71,10 +70,12 @@ class VAEGAINImputer(BaseEstimator):
             params,
             self.device
         )
-        print("Training finished.")
+        self._save_checkpoint("vaegain_imputer_complete.pkl")
+
+        print("Training finished and parameters saved to temp dir.")
         return self
 
-    def predict(self, data):
+    def predict(self, data: np.ndarray) -> np.ndarray:
         """
         Args:
             data: 原始数据

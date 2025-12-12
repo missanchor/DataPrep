@@ -1,9 +1,9 @@
 import numpy as np
 import torch
-from dataprep.base import BaseEstimator
+from dataprep.tabular.imputation.base import BaseImputer
 import dataprep.tabular.imputation.GAIN_module as gm
 
-class GAINImputer(BaseEstimator):
+class GAIN(BaseImputer):
     def __init__(self,
                  batch_size=128,
                  hint_rate=0.9,
@@ -21,30 +21,30 @@ class GAINImputer(BaseEstimator):
         self.generator = None
         self.discriminator = None
 
-    def train(self, data, missing_mask):
+    def train(self, data: np.ndarray, missing_mask: np.ndarray) -> 'GAIN':
         """
         Args:
-            data: np.array, 包含数据的矩阵 (可以包含 NaN，也可以是已经填0的，依据 mask)
+            data: np.array, 包含数据的矩阵
             missing_mask: np.array, 0表示缺失, 1表示观测到 (与 data 形状相同)
         """
+        self._create_temp_dir(prefix="gain_train_")
         data = np.array(data)
         missing_mask = np.array(missing_mask)
         no, dim = data.shape
         h_dim = int(dim)
 
-        # 1. 数据归一化 (使用 module 中的函数)
+        # 1. 数据归一化
         data_for_norm = data.copy()
         data_for_norm[missing_mask == 0] = np.nan
         norm_data, self.norm_parameters = gm.normalization(data_for_norm)
 
-        # 将 NaN 填为 0 以输入网络
         norm_data_x = np.nan_to_num(norm_data, 0)
 
         # 2. 初始化网络
         self.generator = gm.GainGenerator(dim, h_dim).to(self.device)
         self.discriminator = gm.GainDiscriminator(dim, h_dim).to(self.device)
 
-        # 3. 调用 Module 中的训练循环
+        # 3. 调用训练循环
         params = {
             'batch_size': self.batch_size,
             'epoch': self.epoch,
@@ -61,10 +61,12 @@ class GAINImputer(BaseEstimator):
             params,
             self.device
         )
-        print("Training finished.")
+        self._save_checkpoint("gain_imputer_complete.pkl")
+
+        print("Training finished and parameters saved to temp dir.")
         return self
 
-    def predict(self, data):
+    def predict(self, data: np.ndarray) -> np.ndarray:
         """
         Args:
             data: 原始数据
