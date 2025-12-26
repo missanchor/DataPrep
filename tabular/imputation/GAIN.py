@@ -21,7 +21,7 @@ class GAIN(BaseImputer):
         self.generator = None
         self.discriminator = None
 
-    def train(self, data: np.ndarray, missing_mask: np.ndarray) -> 'GAIN':
+    def train(self, data: np.ndarray, missing_mask: np.ndarray) -> None:
         """
         Args:
             data: np.array, 包含数据的矩阵
@@ -64,7 +64,6 @@ class GAIN(BaseImputer):
         self._save_checkpoint("gain_imputer_complete.pkl")
 
         print("Training finished and parameters saved to temp dir.")
-        return self
 
     def predict(self, data: np.ndarray) -> np.ndarray:
         """

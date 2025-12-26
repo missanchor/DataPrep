@@ -26,7 +26,7 @@ class VAEGAIN(BaseImputer):
         self.decoder = None
         self.discriminator = None
 
-    def train(self, data: np.ndarray, missing_mask: np.ndarray) -> 'VAEGAIN':
+    def train(self, data: np.ndarray, missing_mask: np.ndarray) -> None:
         """
         Args:
             data: np.array, 原始数据 (包含 NaN)
@@ -73,7 +73,6 @@ class VAEGAIN(BaseImputer):
         self._save_checkpoint("vaegain_imputer_complete.pkl")
 
         print("Training finished and parameters saved to temp dir.")
-        return self
 
     def predict(self, data: np.ndarray) -> np.ndarray:
         """

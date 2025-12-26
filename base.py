@@ -3,6 +3,7 @@ import joblib  # 或者使⽤ pickle/cloudpickle
 import tempfile
 import shutil
 import os
+from pathlib import Path
 
 class BaseEstimator(ABC):
 
@@ -50,7 +51,9 @@ class BaseEstimator(ABC):
         创建一个唯一的临时目录。
         prefix: 目录的前缀，方便识别 (例如 'gain_', 'scis_')
         """
-        self.temp_dir = tempfile.mkdtemp(prefix=prefix)
+        parent_dir = Path("./temp")
+        parent_dir.mkdir(parents=True, exist_ok=True)
+        self.temp_dir = tempfile.mkdtemp(prefix=prefix, dir='./temp')
         print(f"[System] Temporary checkpoint directory created at: {self.temp_dir}")
         return self.temp_dir
 

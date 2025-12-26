@@ -1,0 +1,139 @@
+Analysis Results for age
+==================================================
+
+
+=== Data Distribution Analysis Function 1 ===
+def distr_analysis_age_distribution(dirty_csv, attr_name):
+    # Ensure the column is numeric by converting strings to integers
+    dirty_csv[attr_name] = dirty_csv[attr_name].str.replace(',', '').astype(int)
+    
+    # Describe the age distribution
+    age_distribution = dirty_csv[attr_name].describe()
+    
+    # Detect outliers
+    q1 = age_distribution['25%']
+    q3 = age_distribution['75%']
+    iqr = q3 - q1
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+    
+    # Find and describe outliers
+    outliers = dirty_csv[(dirty_csv[attr_name] < lower_bound) | (dirty_csv[attr_name] > upper_bound)]
+    
+    # Detailed analysis results
+    analysis = (
+        f"Age Distribution:\n"
+        f"Count: {len(dirty_csv)}\n"
+        f"Min: {age_distribution['min']}\n"
+        f"Q1: {q1}\n"
+        f"Median: {age_distribution['50%']}\n"
+        f"Q3: {q3}\n"
+        f"Max: {age_distribution['max']}\n"
+        f"IQR: {iqr}\n"
+        f"Lower Bound: {lower_bound}\n"
+        f"Upper Bound: {upper_bound}\n"
+        f"Outliers found: {len(outliers)}\n"
+        f"Outliers: {outliers[attr_name].tolist()}\n"
+    )
+    
+    return analysis
+
+**Running Results:**
+Age Distribution:
+Count: 10
+Min: 22.0
+Q1: 28.25
+Median: 31.5
+Q3: 38.75
+Max: 999.0
+IQR: 10.5
+Lower Bound: 12.5
+Upper Bound: 54.5
+Outliers found: 1
+Outliers: [999]
+
+
+=== Data Distribution Analysis Function 2 ===
+def distr_analysis_city_distribution(dirty_csv, attr_name):
+    # Count the frequency of each city
+    city_counts = dirty_csv['city'].value_counts()
+    
+    # Find the most common city
+    most_common_city = city_counts.idxmax()
+    most_common_count = city_counts.max()
+    
+    # Find the least common city
+    least_common_city = city_counts.idxmin()
+    least_common_count = city_counts.min()
+    
+    # Detailed analysis results
+    analysis = (
+        f"City Distribution:\n"
+        f"Total Cities: {len(city_counts)}\n"
+        f"Most Common City: {most_common_city} with {most_common_count} occurrences\n"
+        f"Least Common City: {least_common_city} with {least_common_count} occurrences\n"
+        f"City Counts:\n{city_counts}\n"
+    )
+    
+    return analysis
+
+**Running Results:**
+City Distribution:
+Total Cities: 4
+Most Common City: SF with 3 occurrences
+Least Common City: Unknown with 1 occurrences
+City Counts:
+SF         3
+NY         3
+LA         3
+Unknown    1
+Name: city, dtype: int64
+
+
+=== Data Distribution Analysis Function 3 ===
+def distr_analysis_name_length(dirty_csv, attr_name):
+    # Calculate the length of each name
+    name_lengths = dirty_csv['name'].str.len()
+    
+    # Describe the length distribution
+    length_distribution = name_lengths.describe()
+    
+    # Find the longest and shortest name
+    longest_name = dirty_csv['name'].str.len().idxmax()
+    longest_length = dirty_csv['name'].str.len().max()
+    
+    shortest_name = dirty_csv['name'].str.len().idxmin()
+    shortest_length = dirty_csv['name'].str.len().min()
+    
+    # Detailed analysis results
+    analysis = (
+        f"Name Length Distribution:\n"
+        f"Count: {len(dirty_csv)}\n"
+        f"Min Length: {shortest_length} (Name: {shortest_name})\n"
+        f"Max Length: {longest_length} (Name: {longest_name})\n"
+        f"Mean Length: {length_distribution['mean']}\n"
+        f"Median Length: {length_distribution['50%']}\n"
+        f"Std Dev Length: {length_distribution['std']}\n"
+        f"Length Distribution:\n{length_distribution}\n"
+    )
+    
+    return analysis
+
+**Running Results:**
+Name Length Distribution:
+Count: 10
+Min Length: 3 (Name: 1)
+Max Length: 8 (Name: 2)
+Mean Length: 4.9
+Median Length: 5.0
+Std Dev Length: 1.5951314818673865
+Length Distribution:
+count    10.000000
+mean      4.900000
+std       1.595131
+min       3.000000
+25%       4.000000
+50%       5.000000
+75%       5.000000
+max       8.000000
+Name: name, dtype: float64

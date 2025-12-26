@@ -1,0 +1,158 @@
+Analysis Results for name
+==================================================
+
+
+=== Data Distribution Analysis Function 1 ===
+def distr_analysis_name_length(dirty_csv, attr_name):
+    """
+    Analyze the length distribution of names.
+    """
+    # Extract the length of each name
+    name_lengths = dirty_csv[attr_name].str.len()
+    
+    # Basic statistics on name lengths
+    min_length = name_lengths.min()
+    max_length = name_lengths.max()
+    mean_length = name_lengths.mean()
+    median_length = name_lengths.median()
+    
+    # Representative names
+    short_names = dirty_csv[name_lengths == min_length][attr_name].tolist()
+    long_names = dirty_csv[name_lengths == max_length][attr_name].tolist()
+    
+    result = f"Name length distribution analysis:\n"
+    result += f"Minimum length: {min_length} (Names: {short_names})\n"
+    result += f"Maximum length: {max_length} (Names: {long_names})\n"
+    result += f"Mean length: {mean_length:.2f}\n"
+    result += f"Median length: {median_length:.2f}\n"
+    return result
+
+**Running Results:**
+Name length distribution analysis:
+Minimum length: 3 (Names: ['Bob', 'Ivy'])
+Maximum length: 8 (Names: ['ErrorVal'])
+Mean length: 4.90
+Median length: 5.00
+
+
+=== Data Distribution Analysis Function 2 ===
+def distr_analysis_name_start(dirty_csv, attr_name):
+    """
+    Analyze the starting character distribution of names.
+    """
+    # Extract the first character of each name
+    name_starts = dirty_csv[attr_name].str[0]
+    
+    # Basic statistics on starting characters
+    start_counts = name_starts.value_counts()
+    
+    # Representative names
+    common_starts = start_counts[start_counts > 1].index.tolist()
+    uncommon_starts = start_counts[start_counts == 1].index.tolist()
+    
+    result = f"Starting character distribution analysis of names:\n"
+    result += f"Common starting characters: {common_starts}\n"
+    result += f"Uncommon starting characters: {uncommon_starts}\n"
+    result += f"Counts:\n"
+    for start, count in start_counts.items():
+        result += f"  {start}: {count}\n"
+    return result
+
+**Running Results:**
+Starting character distribution analysis of names:
+Common starting characters: []
+Uncommon starting characters: ['C', 'E', 'F', 'J', 'H', 'G', 'B', 'A', 'I', 'D']
+Counts:
+  C: 1
+  E: 1
+  F: 1
+  J: 1
+  H: 1
+  G: 1
+  B: 1
+  A: 1
+  I: 1
+  D: 1
+
+
+=== Data Distribution Analysis Function 3 ===
+def distr_analysis_name_end(dirty_csv, attr_name):
+    """
+    Analyze the ending character distribution of names.
+    """
+    # Extract the last character of each name
+    name_ends = dirty_csv[attr_name].str[-1]
+    
+    # Basic statistics on ending characters
+    end_counts = name_ends.value_counts()
+    
+    # Representative names
+    common_ends = end_counts[end_counts > 1].index.tolist()
+    uncommon_ends = end_counts[end_counts == 1].index.tolist()
+    
+    result = f"Ending character distribution analysis of names:\n"
+    result += f"Common ending characters: {common_ends}\n"
+    result += f"Uncommon ending characters: {uncommon_ends}\n"
+    result += f"Counts:\n"
+    for end, count in end_counts.items():
+        result += f"  {end}: {count}\n"
+    return result
+
+**Running Results:**
+Ending character distribution analysis of names:
+Common ending characters: ['e', 'k']
+Uncommon ending characters: ['d', 'b', 'l', 'y']
+Counts:
+  e: 4
+  k: 2
+  d: 1
+  b: 1
+  l: 1
+  y: 1
+
+
+=== Data Distribution Analysis Function 4 ===
+def distr_analysis_name_frequency(dirty_csv, attr_name):
+    """
+    Analyze the frequency distribution of names.
+    """
+    # Count the occurrences of each name
+    name_counts = dirty_csv[attr_name].value_counts()
+    
+    # Basic statistics on name frequencies
+    min_count = name_counts.min()
+    max_count = name_counts.max()
+    mean_count = name_counts.mean()
+    median_count = name_counts.median()
+    
+    # Representative names
+    common_names = name_counts[name_counts > 1].index.tolist()
+    uncommon_names = name_counts[name_counts == 1].index.tolist()
+    
+    result = f"Name frequency distribution analysis:\n"
+    result += f"Minimum frequency: {min_count} (Names: {uncommon_names})\n"
+    result += f"Maximum frequency: {max_count} (Names: {common_names})\n"
+    result += f"Mean frequency: {mean_count:.2f}\n"
+    result += f"Median frequency: {median_count:.2f}\n"
+    result += f"Counts:\n"
+    for name, count in name_counts.items():
+        result += f"  {name}: {count}\n"
+    return result
+
+**Running Results:**
+Name frequency distribution analysis:
+Minimum frequency: 1 (Names: ['David', 'Alice', 'Charlie', 'Grace', 'Bob', 'Hebe', 'Jack', 'Ivy', 'ErrorVal', 'Frank'])
+Maximum frequency: 1 (Names: [])
+Mean frequency: 1.00
+Median frequency: 1.00
+Counts:
+  David: 1
+  Alice: 1
+  Charlie: 1
+  Grace: 1
+  Bob: 1
+  Hebe: 1
+  Jack: 1
+  Ivy: 1
+  ErrorVal: 1
+  Frank: 1

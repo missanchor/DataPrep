@@ -31,7 +31,7 @@ class SCIS(BaseImputer):
         self.generator = None
         self.discriminator = None
 
-    def train(self, data: np.ndarray, missing_mask: np.ndarray) -> 'SCIS':
+    def train(self, data: np.ndarray, missing_mask: np.ndarray) -> None:
         """
         训练 SCIS 模型。
         Args:
@@ -79,7 +79,6 @@ class SCIS(BaseImputer):
         self._save_checkpoint("scis_imputer_complete.pkl")
 
         print("Training finished and parameters saved to temp dir.")
-        return self
 
     def predict(self, data: np.ndarray) -> np.ndarray:
         """
