@@ -23,6 +23,8 @@ from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
 from sklearn.preprocessing import MinMaxScaler
 from kneed import KneeLocator
 from openai import OpenAI
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage
 
 
 # =============================================================================
@@ -57,32 +59,32 @@ class Logger:
     def error(self, msg): self.logger.error(msg)
 
 
-def get_ans_from_llm(prompt: str, api_key: str, model_name: str, api_use: bool = True):
-    """LLM 调用封装"""
+def get_ans_from_llm(prompt: str, api_key: str, model_name: str, base_url: str = 'https://api.siliconflow.cn/v1/', api_use: bool = True):
+    """LLM 调用封装 (LangChain 优化版)"""
     if not api_use or not api_key:
         return "LLM API usage is disabled."
 
-    client = OpenAI(api_key=api_key, base_url='https://api.siliconflow.cn/v1/')
-    max_retries = 3
+    try:
+        # 1. 初始化时直接配置重试次数
+        llm = ChatOpenAI(
+            model=model_name,
+            temperature=0.5,
+            api_key=api_key,
+            base_url=base_url,
+            max_retries=3  # LangChain 会自动处理重试和指数退避
+        )
 
-    for attempt in range(max_retries):
-        try:
-            resp = client.chat.completions.create(
-                model=model_name,
-                temperature=0.5,
-                messages=[
-                    {"role": "system", "content": "You are a world-class data quality expert."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            return resp.choices[0].message.content
-        except Exception as e:
-            if attempt < max_retries - 1:
-                time.sleep(1)
-            else:
-                print(f"LLM API Error after retries: {e}")
-                return ""
-    return ""
+        messages = [
+            SystemMessage(content="You are a world-class data quality expert."),
+            HumanMessage(content=prompt)
+        ]
+
+        resp = llm.invoke(messages)
+        return resp.content
+
+    except Exception as e:
+        print(f"LLM API Error: {e}")
+        return ""
 
 
 def extract_json_from_text(text: str):
@@ -229,7 +231,7 @@ def train_single_column_pipeline(attr_name, df, related_attrs_map, params, logge
         # 实例化分析器并运行
         analyzer = LLMDataDistrAnalyzer(df)
         prompt, _ = analyzer.generate_llm_prompt(attr_name)
-        llm_resp = get_ans_from_llm(prompt, params['api_key'], params['model_name'], params['api_use'])
+        llm_resp = get_ans_from_llm(prompt, params['api_key'], params['model_name'], params['base_url'],params['api_use'])
         analy_res = analyzer.analyze_data(attr_name, llm_resp,
                                           os.path.join(params['result_dir'], f'{attr_name}_dist.txt'))
 
@@ -237,7 +239,7 @@ def train_single_column_pipeline(attr_name, df, related_attrs_map, params, logge
     if params['guide_use']:
         logger.info("  Phase 4: Generating Guide...")
         prompt = kb_gen_prompt(attr_name, "dataset", centers, df, analy_res)
-        get_ans_from_llm(prompt, params['api_key'], params['model_name'], params['api_use'])
+        get_ans_from_llm(prompt, params['api_key'], params['model_name'], params['base_url'],params['api_use'])
 
     # --- Phase 5: Labeling & Propagation ---
     logger.info("  Phase 5: Labeling and Propagating...")
@@ -385,7 +387,7 @@ def _label_and_propagate(df, attr, centers, clusters, params):
     for c_idx in centers:
         row_str = str(df.iloc[c_idx].to_dict())
         prompt = error_check_prompt(row_str, attr)
-        resp = get_ans_from_llm(prompt, params['api_key'], params['model_name'], params['api_use'])
+        resp = get_ans_from_llm(prompt, params['api_key'], params['model_name'], params['base_url'],params['api_use'])
 
         # 解析 LLM 响应，寻找 "has_error": true
         if '"has_error' in resp and 'true' in resp.lower():
@@ -410,7 +412,7 @@ def _generate_synthetic_errors(df, attr, clean_idxs, dirty_idxs, params):
     dirty_vals = df.iloc[dirty_idxs[:5]].to_dict('records') if dirty_idxs else []
 
     prompt = create_err_gen_inst_prompt(clean_vals, dirty_vals, attr)
-    resp = get_ans_from_llm(prompt, params['api_key'], params['model_name'], params['api_use'])
+    resp = get_ans_from_llm(prompt, params['api_key'], params['model_name'], params['base_url'],params['api_use'])
 
     gen_list = extract_json_from_text(resp)
     new_feats = []
@@ -430,7 +432,7 @@ def _generate_and_filter_funcs(df, attr, clean_idxs, dirty_idxs, labels, params)
     err_info = str(df.iloc[dirty_idxs[:3]][attr].tolist()) if dirty_idxs else "[]"
 
     prompt = err_clean_func_prompt(attr, clean_info, err_info)
-    resp = get_ans_from_llm(prompt, params['api_key'], params['model_name'], params['api_use'])
+    resp = get_ans_from_llm(prompt, params['api_key'], params['model_name'], params['base_url'],params['api_use'])
     raw_funcs = extract_python_code(resp)
 
     valid = []

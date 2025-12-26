@@ -3,156 +3,120 @@ Analysis Results for name
 
 
 === Data Distribution Analysis Function 1 ===
-def distr_analysis_name_length(dirty_csv, attr_name):
-    """
-    Analyze the length distribution of names.
-    """
-    # Extract the length of each name
-    name_lengths = dirty_csv[attr_name].str.len()
+def distr_analysis_common_names(dirty_csv, attr_name):
+    # Ensure the attribute name is 'name'
+    if attr_name != 'name':
+        return "Attribute name is not 'name'."
     
-    # Basic statistics on name lengths
-    min_length = name_lengths.min()
-    max_length = name_lengths.max()
-    mean_length = name_lengths.mean()
-    median_length = name_lengths.median()
+    # Convert the 'name' column to lowercase for case-insensitive comparison
+    dirty_csv[attr_name] = dirty_csv[attr_name].str.lower()
     
-    # Representative names
-    short_names = dirty_csv[name_lengths == min_length][attr_name].tolist()
-    long_names = dirty_csv[name_lengths == max_length][attr_name].tolist()
-    
-    result = f"Name length distribution analysis:\n"
-    result += f"Minimum length: {min_length} (Names: {short_names})\n"
-    result += f"Maximum length: {max_length} (Names: {long_names})\n"
-    result += f"Mean length: {mean_length:.2f}\n"
-    result += f"Median length: {median_length:.2f}\n"
-    return result
-
-**Running Results:**
-Name length distribution analysis:
-Minimum length: 3 (Names: ['Bob', 'Ivy'])
-Maximum length: 8 (Names: ['ErrorVal'])
-Mean length: 4.90
-Median length: 5.00
-
-
-=== Data Distribution Analysis Function 2 ===
-def distr_analysis_name_start(dirty_csv, attr_name):
-    """
-    Analyze the starting character distribution of names.
-    """
-    # Extract the first character of each name
-    name_starts = dirty_csv[attr_name].str[0]
-    
-    # Basic statistics on starting characters
-    start_counts = name_starts.value_counts()
-    
-    # Representative names
-    common_starts = start_counts[start_counts > 1].index.tolist()
-    uncommon_starts = start_counts[start_counts == 1].index.tolist()
-    
-    result = f"Starting character distribution analysis of names:\n"
-    result += f"Common starting characters: {common_starts}\n"
-    result += f"Uncommon starting characters: {uncommon_starts}\n"
-    result += f"Counts:\n"
-    for start, count in start_counts.items():
-        result += f"  {start}: {count}\n"
-    return result
-
-**Running Results:**
-Starting character distribution analysis of names:
-Common starting characters: []
-Uncommon starting characters: ['C', 'E', 'F', 'J', 'H', 'G', 'B', 'A', 'I', 'D']
-Counts:
-  C: 1
-  E: 1
-  F: 1
-  J: 1
-  H: 1
-  G: 1
-  B: 1
-  A: 1
-  I: 1
-  D: 1
-
-
-=== Data Distribution Analysis Function 3 ===
-def distr_analysis_name_end(dirty_csv, attr_name):
-    """
-    Analyze the ending character distribution of names.
-    """
-    # Extract the last character of each name
-    name_ends = dirty_csv[attr_name].str[-1]
-    
-    # Basic statistics on ending characters
-    end_counts = name_ends.value_counts()
-    
-    # Representative names
-    common_ends = end_counts[end_counts > 1].index.tolist()
-    uncommon_ends = end_counts[end_counts == 1].index.tolist()
-    
-    result = f"Ending character distribution analysis of names:\n"
-    result += f"Common ending characters: {common_ends}\n"
-    result += f"Uncommon ending characters: {uncommon_ends}\n"
-    result += f"Counts:\n"
-    for end, count in end_counts.items():
-        result += f"  {end}: {count}\n"
-    return result
-
-**Running Results:**
-Ending character distribution analysis of names:
-Common ending characters: ['e', 'k']
-Uncommon ending characters: ['d', 'b', 'l', 'y']
-Counts:
-  e: 4
-  k: 2
-  d: 1
-  b: 1
-  l: 1
-  y: 1
-
-
-=== Data Distribution Analysis Function 4 ===
-def distr_analysis_name_frequency(dirty_csv, attr_name):
-    """
-    Analyze the frequency distribution of names.
-    """
-    # Count the occurrences of each name
+    # Count the frequency of each name
     name_counts = dirty_csv[attr_name].value_counts()
     
-    # Basic statistics on name frequencies
-    min_count = name_counts.min()
-    max_count = name_counts.max()
-    mean_count = name_counts.mean()
-    median_count = name_counts.median()
+    # Identify names with more than one occurrence
+    common_names = name_counts[name_counts > 1]
     
-    # Representative names
-    common_names = name_counts[name_counts > 1].index.tolist()
-    uncommon_names = name_counts[name_counts == 1].index.tolist()
+    result = "Common names found:\n"
+    if not common_names.empty:
+        result += "\n".join([f"{name}: {count}" for name, count in common_names.items()])
+    else:
+        result += "No common names found."
     
-    result = f"Name frequency distribution analysis:\n"
-    result += f"Minimum frequency: {min_count} (Names: {uncommon_names})\n"
-    result += f"Maximum frequency: {max_count} (Names: {common_names})\n"
-    result += f"Mean frequency: {mean_count:.2f}\n"
-    result += f"Median frequency: {median_count:.2f}\n"
-    result += f"Counts:\n"
-    for name, count in name_counts.items():
-        result += f"  {name}: {count}\n"
     return result
 
 **Running Results:**
-Name frequency distribution analysis:
-Minimum frequency: 1 (Names: ['David', 'Alice', 'Charlie', 'Grace', 'Bob', 'Hebe', 'Jack', 'Ivy', 'ErrorVal', 'Frank'])
-Maximum frequency: 1 (Names: [])
-Mean frequency: 1.00
-Median frequency: 1.00
-Counts:
-  David: 1
-  Alice: 1
-  Charlie: 1
-  Grace: 1
-  Bob: 1
-  Hebe: 1
-  Jack: 1
-  Ivy: 1
-  ErrorVal: 1
-  Frank: 1
+Common names found:
+No common names found.
+
+=== Data Distribution Analysis Function 2 ===
+def distr_analysis_name_length(dirty_csv, attr_name):
+    # Ensure the attribute name is 'name'
+    if attr_name != 'name':
+        return "Attribute name is not 'name'."
+    
+    # Calculate the length of each name
+    name_lengths = dirty_csv[attr_name].str.len()
+    
+    # Identify names with unusual lengths
+    min_length = name_lengths.min()
+    max_length = name_lengths.max()
+    average_length = name_lengths.mean()
+    
+    result = f"Name length distribution:\nMinimum length: {min_length}\nMaximum length: {max_length}\nAverage length: {average_length:.2f}\n\nRepresentative names:\n"
+    result += "\n".join([f"{name}: {len(name)}" for name in dirty_csv[attr_name].sample(5).tolist()])
+    
+    return result
+
+**Running Results:**
+Name length distribution:
+Minimum length: 3
+Maximum length: 8
+Average length: 4.90
+
+Representative names:
+errorval: 8
+david: 5
+frank: 5
+grace: 5
+alice: 5
+
+=== Data Distribution Analysis Function 3 ===
+def distr_analysis_special_chars(dirty_csv, attr_name):
+    # Ensure the attribute name is 'name'
+    if attr_name != 'name':
+        return "Attribute name is not 'name'."
+    
+    # Define a regex pattern to match special characters
+    special_char_pattern = re.compile(r'[^a-zA-Z\s]')
+    
+    # Find names with special characters
+    special_names = dirty_csv[dirty_csv[attr_name].apply(lambda x: bool(special_char_pattern.search(x)))][attr_name]
+    
+    result = "Names with special characters found:\n"
+    if not special_names.empty:
+        result += "\n".join(special_names.tolist())
+    else:
+        result += "No names with special characters found."
+    
+    return result
+
+**Running Results:**
+Names with special characters found:
+No names with special characters found.
+
+=== Data Distribution Analysis Function 4 ===
+def distr_analysis_city_consistency(dirty_csv, attr_name):
+    # Ensure the attribute name is 'name'
+    if attr_name != 'name':
+        return "Attribute name is not 'name'."
+    
+    # Known cities
+    known_cities = {'NY', 'LA', 'SF'}
+    
+    # Create a dictionary to map names to their respective cities
+    name_to_city = {}
+    for _, row in dirty_csv.iterrows():
+        name = row[attr_name]
+        city = row['city']
+        if name not in name_to_city:
+            name_to_city[name] = set()
+        name_to_city[name].add(city)
+    
+    # Identify names with inconsistent city assignments
+    inconsistent_names = []
+    for name, cities in name_to_city.items():
+        if len(cities) > 1 or any(city not in known_cities for city in cities):
+            inconsistent_names.append(name)
+    
+    result = "Inconsistent city assignments found for the following names:\n"
+    if inconsistent_names:
+        result += "\n".join(inconsistent_names)
+    else:
+        result += "All names have consistent city assignments."
+    
+    return result
+
+**Running Results:**
+Inconsistent city assignments found for the following names:
+errorval

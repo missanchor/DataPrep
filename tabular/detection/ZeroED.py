@@ -11,6 +11,7 @@ class ZeroED(BaseEstimator):
     def __init__(self,
                  model_name="Pro/Qwen/Qwen2.5-7B-Instruct",
                  api_use=True,
+                 base_url='https://api.siliconflow.cn/v1/',
                  local_model_use=True,
                  n_method='kmeans',
                  verbose=True,
@@ -27,6 +28,7 @@ class ZeroED(BaseEstimator):
         # 1. 属性赋值
         self.model_name = model_name
         self.api_use = api_use
+        self.base_url = base_url
         self.local_model_use = local_model_use
         self.n_method = n_method
         self.verbose = verbose
@@ -62,6 +64,7 @@ class ZeroED(BaseEstimator):
         params = {
             'model_name': self.model_name,
             'api_use': self.api_use,
+            'base_url':self.base_url,
             'local_model_use': self.local_model_use,
             'n_method': self.n_method,
             'verbose': self.verbose,

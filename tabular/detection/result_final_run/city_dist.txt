@@ -1,2 +1,135 @@
 Analysis Results for city
 ==================================================
+
+
+=== Data Distribution Analysis Function 1 ===
+def distr_analysis_city_count(dirty_csv, attr_name):
+    """
+    Analyzes the count of unique cities in the dataset.
+    
+    Parameters:
+    - dirty_csv: DataFrame containing the data
+    - attr_name: The name of the attribute (should be 'city')
+    
+    Returns:
+    - A string containing the detailed analysis results.
+    """
+    if attr_name != 'city':
+        return "Attribute name does not match 'city'."
+    
+    city_counts = dirty_csv[attr_name].value_counts()
+    top_cities = city_counts.head(5)
+    bottom_cities = city_counts.tail(5)
+    
+    result = f"City Distribution Analysis:\n\nTop 5 Cities by Count:\n{top_cities}\n\nBottom 5 Cities by Count:\n{bottom_cities}"
+    return result
+
+**Running Results:**
+City Distribution Analysis:
+
+Top 5 Cities by Count:
+city
+NY         3
+LA         3
+SF         3
+Unknown    1
+Name: count, dtype: int64
+
+Bottom 5 Cities by Count:
+city
+NY         3
+LA         3
+SF         3
+Unknown    1
+Name: count, dtype: int64
+
+=== Data Distribution Analysis Function 2 ===
+def distr_analysis_city_unique(dirty_csv, attr_name):
+    """
+    Analyzes the unique cities in the dataset.
+    
+    Parameters:
+    - dirty_csv: DataFrame containing the data
+    - attr_name: The name of the attribute (should be 'city')
+    
+    Returns:
+    - A string containing the detailed analysis results.
+    """
+    if attr_name != 'city':
+        return "Attribute name does not match 'city'."
+    
+    unique_cities = dirty_csv[attr_name].unique()
+    
+    result = f"Unique Cities in Dataset:\n{unique_cities}"
+    return result
+
+**Running Results:**
+Unique Cities in Dataset:
+['NY' 'LA' 'Unknown' 'SF']
+
+=== Data Distribution Analysis Function 3 ===
+def distr_analysis_city_errors(dirty_csv, attr_name):
+    """
+    Analyzes cities with unexpected values (e.g., 'Unknown', 'errorval').
+    
+    Parameters:
+    - dirty_csv: DataFrame containing the data
+    - attr_name: The name of the attribute (should be 'city')
+    
+    Returns:
+    - A string containing the detailed analysis results.
+    """
+    if attr_name != 'city':
+        return "Attribute name does not match 'city'."
+    
+    error_values = ['Unknown', 'errorval']
+    error_count = (dirty_csv[attr_name] == 'Unknown').sum() + (dirty_csv[attr_name] == 'errorval').sum()
+    
+    result = f"Error Analysis for Unexpected City Values:\nTotal Errors: {error_count}\nUnexpected Values: {error_values}"
+    return result
+
+**Running Results:**
+Error Analysis for Unexpected City Values:
+Total Errors: 1
+Unexpected Values: ['Unknown', 'errorval']
+
+=== Data Distribution Analysis Function 4 ===
+def distr_analysis_city_frequency(dirty_csv, attr_name):
+    """
+    Analyzes the frequency of each city in the dataset.
+    
+    Parameters:
+    - dirty_csv: DataFrame containing the data
+    - attr_name: The name of the attribute (should be 'city')
+    
+    Returns:
+    - A string containing the detailed analysis results.
+    """
+    if attr_name != 'city':
+        return "Attribute name does not match 'city'."
+    
+    city_counts = dirty_csv[attr_name].value_counts(normalize=True) * 100
+    top_cities = city_counts.head(5)
+    bottom_cities = city_counts.tail(5)
+    
+    result = f"City Frequency Analysis:\n\nTop 5 Cities by Frequency:\n{top_cities}\n\nBottom 5 Cities by Frequency:\n{bottom_cities}"
+    return result
+
+**Running Results:**
+City Frequency Analysis:
+
+Top 5 Cities by Frequency:
+city
+NY         30.0
+LA         30.0
+SF         30.0
+Unknown    10.0
+Name: proportion, dtype: float64
+
+Bottom 5 Cities by Frequency:
+city
+NY         30.0
+LA         30.0
+SF         30.0
+Unknown    10.0
+Name: proportion, dtype: float64
