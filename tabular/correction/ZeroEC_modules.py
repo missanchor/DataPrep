@@ -112,7 +112,7 @@ def initialize_llm(model_name, api_base, api_key, temperature=0):
 
 
 def harmonic_mean(a, b):
-    return 2 / (1 / a + 1 / b) if (a + b) > 0 else 0
+    return (2 * a * b) / (a + b) if (a + b) > 0 else 0
 
 
 # ==========================================

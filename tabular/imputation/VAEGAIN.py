@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from dataprep.tabular.imputation.base import BaseImputer
-import dataprep.tabular.imputation.VAEGAIN_module as vm
+import dataprep.tabular.imputation.VAEGAIN_modules as vm
 
 class VAEGAIN(BaseImputer):
     def __init__(self,

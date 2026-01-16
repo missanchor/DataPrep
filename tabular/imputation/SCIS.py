@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-import dataprep.tabular.imputation.SCIS_module as sm
+import dataprep.tabular.imputation.SCIS_modules as sm
 from dataprep.tabular.imputation.base import BaseImputer
 
 class SCIS(BaseImputer):

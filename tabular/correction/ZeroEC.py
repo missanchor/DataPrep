@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from langchain_core.output_parsers import JsonOutputParser
 from dataprep.base import BaseEstimator
-import dataprep.tabular.correction.modules as modules
+import dataprep.tabular.correction.ZeroEC_modules as modules
 
 
 class ZeroEC(BaseEstimator):

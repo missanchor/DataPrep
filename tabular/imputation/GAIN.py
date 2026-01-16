@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from dataprep.tabular.imputation.base import BaseImputer
-import dataprep.tabular.imputation.GAIN_module as gm
+import dataprep.tabular.imputation.GAIN_modules as gm
 
 class GAIN(BaseImputer):
     def __init__(self,

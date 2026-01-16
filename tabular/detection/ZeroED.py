@@ -4,7 +4,7 @@ import numpy as np
 from typing import Dict, Any, List
 from dataprep.base import BaseEstimator
 
-import dataprep.tabular.detection.modules as mo
+import dataprep.tabular.detection.ZeroED_modules as mo
 
 
 class ZeroED(BaseEstimator):
