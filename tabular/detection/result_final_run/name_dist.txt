@@ -1,0 +1,93 @@
+Analysis Results for name
+==================================================
+
+
+=== Data Distribution Analysis Function 1 ===
+def distr_analysis_age(dirty_csv, attr_name):
+    if attr_name != 'age':
+        return "Attribute name does not match 'age'"
+    
+    # Convert 'age' to numeric and drop invalid entries
+    dirty_csv['age'] = pd.to_numeric(dirty_csv['age'], errors='coerce')
+    valid_ages = dirty_csv.dropna(subset=['age'])
+    
+    # Plot histogram to visualize age distribution
+    plt.figure(figsize=(10, 6))
+    plt.hist(valid_ages['age'], bins=range(0, 100, 5), edgecolor='black')
+    plt.title('Age Distribution')
+    plt.xlabel('Age')
+    plt.ylabel('Count')
+    plt.show()
+    
+    # Analyze outliers
+    q1 = valid_ages['age'].quantile(0.25)
+    q3 = valid_ages['age'].quantile(0.75)
+    iqr = q3 - q1
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+    
+    outliers = valid_ages[(valid_ages['age'] < lower_bound) | (valid_ages['age'] > upper_bound)]
+    
+    if outliers.empty:
+        return "No significant outliers detected in age distribution."
+    else:
+        return f"Outliers detected: {outliers}"
+
+**Running Results:**
+Attribute name does not match 'age'
+
+=== Data Distribution Analysis Function 2 ===
+def distr_analysis_city(dirty_csv, attr_name):
+    if attr_name != 'city':
+        return "Attribute name does not match 'city'"
+    
+    # Count occurrences of each city
+    city_counts = dirty_csv['city'].value_counts()
+    
+    # Plot bar chart to visualize city distribution
+    plt.figure(figsize=(10, 6))
+    city_counts.plot(kind='bar', color='skyblue')
+    plt.title('City Distribution')
+    plt.xlabel('City')
+    plt.ylabel('Count')
+    plt.xticks(rotation=45)
+    plt.show()
+    
+    # Analyze cities with low counts
+    low_count_cities = city_counts[city_counts < 5]
+    
+    if low_count_cities.empty:
+        return "All cities have sufficient representation."
+    else:
+        return f"Cities with low representation: {low_count_cities.index.tolist()}"
+
+**Running Results:**
+Attribute name does not match 'city'
+
+=== Data Distribution Analysis Function 3 ===
+def distr_analysis_name(dirty_csv, attr_name):
+    if attr_name != 'name':
+        return "Attribute name does not match 'name'"
+    
+    # Count occurrences of each name
+    name_counts = dirty_csv['name'].value_counts()
+    
+    # Plot bar chart to visualize name distribution
+    plt.figure(figsize=(10, 6))
+    name_counts.plot(kind='bar', color='green')
+    plt.title('Name Distribution')
+    plt.xlabel('Name')
+    plt.ylabel('Count')
+    plt.xticks(rotation=45)
+    plt.show()
+    
+    # Analyze names with low counts
+    low_count_names = name_counts[name_counts < 2]
+    
+    if low_count_names.empty:
+        return "All names have sufficient representation."
+    else:
+        return f"Names with low representation: {low_count_names.index.tolist()}"
+
+**Running Results:**
+Error executing function: name 'plt' is not defined

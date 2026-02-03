@@ -1,0 +1,152 @@
+Analysis Results for city
+==================================================
+
+
+=== Data Distribution Analysis Function 1 ===
+def distr_analysis_city_by_frequency(dirty_csv, attr_name):
+    """
+    Analyzes the frequency distribution of cities in the dataset.
+    
+    Parameters:
+    - dirty_csv: DataFrame containing the data.
+    - attr_name: The name of the attribute (should be 'city' in this case).
+    
+    Returns:
+    - A string containing the detailed analysis results.
+    """
+    if attr_name != 'city':
+        raise ValueError("attr_name must be 'city'")
+    
+    city_counts = dirty_csv[attr_name].value_counts()
+    top_cities = city_counts.head(5)
+    less_common_cities = city_counts[city_counts < 3]
+    
+    result = f"City Frequency Distribution Analysis:\n\nTop 5 Cities:\n{top_cities}\n\nLess Common Cities (fewer than 3 occurrences):\n{less_common_cities}\n"
+    
+    return result
+
+**Running Results:**
+City Frequency Distribution Analysis:
+
+Top 5 Cities:
+city
+NY         3
+LA         3
+SF         3
+Unknown    1
+Name: count, dtype: int64
+
+Less Common Cities (fewer than 3 occurrences):
+city
+Unknown    1
+Name: count, dtype: int64
+
+
+=== Data Distribution Analysis Function 2 ===
+def distr_analysis_city_by_location(dirty_csv, attr_name):
+    """
+    Analyzes the geographical distribution of cities in the dataset.
+    
+    Parameters:
+    - dirty_csv: DataFrame containing the data.
+    - attr_name: The name of the attribute (should be 'city' in this case).
+    
+    Returns:
+    - A string containing the detailed analysis results.
+    """
+    if attr_name != 'city':
+        raise ValueError("attr_name must be 'city'")
+    
+    unique_cities = dirty_csv[attr_name].unique()
+    east_coast_cities = ['NY', 'Boston', 'Philadelphia']
+    west_coast_cities = ['SF', 'LA', 'San Diego']
+    other_cities = [city for city in unique_cities if city not in east_coast_cities + west_coast_cities]
+    
+    result = f"Geographical Distribution of Cities Analysis:\n\nEast Coast Cities:\n{', '.join(east_coast_cities)}\n\nWest Coast Cities:\n{', '.join(west_coast_cities)}\n\nOther Cities:\n{', '.join(other_cities)}\n"
+    
+    return result
+
+**Running Results:**
+Geographical Distribution of Cities Analysis:
+
+East Coast Cities:
+NY, Boston, Philadelphia
+
+West Coast Cities:
+SF, LA, San Diego
+
+Other Cities:
+Unknown
+
+
+=== Data Distribution Analysis Function 3 ===
+def distr_analysis_city_by_age_range(dirty_csv, attr_name):
+    """
+    Analyzes the relationship between city and age range in the dataset.
+    
+    Parameters:
+    - dirty_csv: DataFrame containing the data.
+    - attr_name: The name of the attribute (should be 'city' in this case).
+    
+    Returns:
+    - A string containing the detailed analysis results.
+    """
+    if attr_name != 'city':
+        raise ValueError("attr_name must be 'city'")
+    
+    city_age_ranges = dirty_csv.groupby(attr_name)['age_range'].apply(lambda x: ', '.join(set(x)))
+    result = f"Relationship Between City and Age Range Analysis:\n\n{city_age_ranges.to_string()}\n"
+    
+    return result
+
+**Running Results:**
+Relationship Between City and Age Range Analysis:
+
+city
+LA                       26-35
+NY         36-45, 46-60, 26-35
+SF         18-25, 36-45, 26-35
+Unknown                Over 60
+
+
+=== Data Distribution Analysis Function 4 ===
+def distr_analysis_city_by_errors(dirty_csv, attr_name):
+    """
+    Analyzes the presence of errors in the city column.
+    
+    Parameters:
+    - dirty_csv: DataFrame containing the data.
+    - attr_name: The name of the attribute (should be 'city' in this case).
+    
+    Returns:
+    - A string containing the detailed analysis results.
+    """
+    if attr_name != 'city':
+        raise ValueError("attr_name must be 'city'")
+    
+    error_val = 'Unknown'
+    error_rows = dirty_csv[dirty_csv[attr_name] == error_val]
+    non_error_rows = dirty_csv[dirty_csv[attr_name] != error_val]
+    
+    result = f"Error Analysis in City Column:\n\nRows with 'Unknown' City:\n{error_rows[['name', 'age', 'city', 'age_range']].to_string(index=False)}\n\nNon-Error Rows:\n{non_error_rows[['name', 'age', 'city', 'age_range']].to_string(index=False)}\n"
+    
+    return result
+
+**Running Results:**
+Error Analysis in City Column:
+
+Rows with 'Unknown' City:
+    name  age    city age_range
+ErrorVal  999 Unknown   Over 60
+
+Non-Error Rows:
+   name  age city age_range
+  Alice   25   NY     26-35
+    Bob   30   LA     26-35
+Charlie   35   SF     36-45
+  David   40   NY     36-45
+  Frank   28   LA     26-35
+  Grace   22   SF     18-25
+   Hebe   45   NY     46-60
+    Ivy   33   LA     26-35
+   Jack   29   SF     26-35

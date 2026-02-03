@@ -1,0 +1,92 @@
+Analysis Results for age
+==================================================
+
+
+=== Data Distribution Analysis Function 1 ===
+def distr_analysis_age_range(dirty_csv, attr_name):
+    if attr_name != 'age':
+        raise ValueError("Attribute name must be 'age'")
+    
+    # Convert age to integer
+    dirty_csv['age'] = dirty_csv['age'].str.replace(',', '').astype(int)
+    
+    # Define age ranges
+    bins = [0, 18, 25, 35, 45, 60, float('inf')]
+    labels = ['Under 18', '18-25', '26-35', '36-45', '46-60', 'Over 60']
+    
+    # Categorize ages
+    dirty_csv['age_range'] = pd.cut(dirty_csv['age'], bins=bins, labels=labels, right=False)
+    
+    # Summary statistics
+    summary = dirty_csv['age_range'].value_counts().reset_index()
+    summary.columns = ['Age Range', 'Count']
+    
+    # Return detailed analysis
+    return f"Summary of age distribution:\n{summary.to_string(index=False)}"
+
+**Running Results:**
+Summary of age distribution:
+Age Range  Count
+    26-35      5
+    36-45      2
+    46-60      1
+    18-25      1
+  Over 60      1
+ Under 18      0
+
+=== Data Distribution Analysis Function 2 ===
+def distr_analysis_city(dirty_csv, attr_name):
+    if attr_name != 'city':
+        raise ValueError("Attribute name must be 'city'")
+    
+    # Summary statistics
+    summary = dirty_csv['city'].value_counts().reset_index()
+    summary.columns = ['City', 'Count']
+    
+    # Return detailed analysis
+    return f"Summary of city distribution:\n{summary.to_string(index=False)}"
+
+**Running Results:**
+Error executing function: Attribute name must be 'city'
+
+=== Data Distribution Analysis Function 3 ===
+def distr_analysis_name_length(dirty_csv, attr_name):
+    if attr_name != 'name':
+        raise ValueError("Attribute name must be 'name'")
+    
+    # Calculate name length
+    dirty_csv['name_length'] = dirty_csv['name'].str.len()
+    
+    # Summary statistics
+    summary = dirty_csv['name_length'].describe().reset_index()
+    summary.columns = ['Metric', 'Value']
+    
+    # Return detailed analysis
+    return f"Summary of name length distribution:\n{summary.to_string(index=False)}"
+
+**Running Results:**
+Error executing function: Attribute name must be 'name'
+
+=== Data Distribution Analysis Function 4 ===
+def distr_analysis_age_city(dirty_csv, attr_name):
+    if attr_name != 'age':
+        raise ValueError("Attribute name must be 'age'")
+    
+    # Convert age to integer
+    dirty_csv['age'] = dirty_csv['age'].str.replace(',', '').astype(int)
+    
+    # Define age ranges
+    bins = [0, 18, 25, 35, 45, 60, float('inf')]
+    labels = ['Under 18', '18-25', '26-35', '36-45', '46-60', 'Over 60']
+    
+    # Categorize ages
+    dirty_csv['age_range'] = pd.cut(dirty_csv['age'], bins=bins, labels=labels, right=False)
+    
+    # Cross-tabulate age range with city
+    crosstab = pd.crosstab(dirty_csv['age_range'], dirty_csv['city'])
+    
+    # Return detailed analysis
+    return f"Cross-tabulation of age range vs. city:\n{crosstab.to_string()}"
+
+**Running Results:**
+Error executing function: Can only use .str accessor with string values!
