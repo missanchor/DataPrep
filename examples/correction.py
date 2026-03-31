@@ -88,7 +88,7 @@ if __name__ == "__main__":
         openai_api_key="",
         embedding_model_path=f'{BASE_DIR}/all-MiniLM-L6-v2',
         human_repair_num=10,  # 每一列提供给 LLM 的样本参考数
-        output_dir=f'{BASE_DIR}/runs_rayyan',
+        output_dir='./temp/runs_rayyan',
         clean_data_path=clean_path,
         dirty_data_path=dirty_path,
         detection_path=detect_path,

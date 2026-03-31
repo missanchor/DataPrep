@@ -98,7 +98,7 @@ def sample_M(batch_size, dim, p):
 
 def train_gain_algorithm(generator, discriminator, data_x, mask, params, device):
     """
-    执行 GAIN 的标准训练循环 (带 Loss 显示)
+    执行 GAIN 的标准训练循环
     Args:
         data_x: 归一化后的数据 (已将NaN填为0)
         mask: 掩码矩阵 (1=Observed, 0=Missing)

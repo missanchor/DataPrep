@@ -1,8 +1,7 @@
 import numpy as np
 import torch
-# 假设 GainGenerator, GainDiscriminator 和工具函数在 GAIN_modules.py 中
 import dataprep.tabular.imputation.GAIN_modules as gm
-from dataprep.tabular.imputation.base import BaseImputer  # 假设你有这个基类
+from dataprep.tabular.imputation.base import BaseImputer
 
 
 class GAIN(BaseImputer):
@@ -10,7 +9,7 @@ class GAIN(BaseImputer):
                  batch_size=128,
                  hint_rate=0.9,
                  alpha=100,
-                 epoch=10000,
+                 epoch=100,
                  device=None):
         """
         GAIN Imputer Class

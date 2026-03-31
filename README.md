@@ -30,19 +30,100 @@ pip install -r requirements.txt
 
 ## 🚀 Getting Started
 
-To understand how to use the different modules within this toolkit, please refer to the provided scripts in the `examples/` directory.
+### 1.Imputation
+This module recovers missing values in tabular data using advanced generative models (e.g., GAIN, VAEGAIN, SCIS).
+
+### How to use:
+You need a dataset with missing values and a corresponding boolean mask (where 1 indicates observed values and 0 indicates missing values).
+
 ```bash
-cd examples/
-python imputation.py
-python detection.py
-python correction
+import pandas as pd
+from dataprep.tabular.imputation.GAIN import GAIN
+
+# 1. Load Data and Mask (NumPy arrays expected)
+data_missing = pd.read_csv('datasets/data_missing.csv').values
+missing_mask = pd.read_csv('datasets/missing_mask.csv').values
+
+# 2. Initialize the Model
+# You can swap GAIN with VAEGAIN or SCIS
+model = GAIN(
+    batch_size=128, 
+    hint_rate=0.9, 
+    alpha=100, 
+    epoch=1000,
+    device='cuda' # or 'cpu'
+)
+
+# 3. Train and Predict
+imputed_data = model.train_and_predict(data_missing, missing_mask)
+
+# Save results
+pd.DataFrame(imputed_data).to_csv('imputed_results.csv', index=False)
 ```
 
+### 2.Detection
+This module identifies dirty or anomalous cells within a dataset. It includes LLM-assisted zero-shot detection (ZeroED) alongside standard baselines like Isolation Forest and LOF.
 
-## 🔍 Additional Setup for ZeroEC
+### How to use:
+For LLM-based detection, you need to configure your API base and model name (e.g., qwen2.5-7b or gpt-3.5-turbo).
 
-If you intend to use the **ZeroEC** (Zero-shot Error Correction) module, an additional model asset is required:
+```bash
+import pandas as pd
+from dataprep.tabular.detection.ZeroED import ZeroED
 
-1. Visit the [ZeroEC Repository](https://github.com/YangChen32768/ZeroEC.git).
-2. Download the `all-MiniLM-L6-v2` folder.
-3. Place the folder within your local `ZeroEC` directory or the designated path in your configuration to ensure the embedding-based correction works correctly.
+# 1. Load Dirty Data
+df_raw = pd.read_csv('datasets/dirty_data.csv')
+
+# 2. Initialize Detector
+detector = ZeroED(
+    model_name="qwen2.5-7b", 
+    api_use=True,
+    base_url="http://localhost:8000/v1", # Your LLM API endpoint
+    api_key="YOUR_API_KEY",
+    n_method="agglomerative"
+)
+
+# 3. Train and Predict 
+error_mask = detector.train_and_predict(df_raw) # Returns a boolean matrix
+
+# Save the generated mask
+pd.DataFrame(error_mask).to_csv('generated_error_mask.csv', index=False)
+```
+
+### 3.Correction
+Once errors are detected, this module repairs the specific dirty cells. ZeroEC utilizes LLMs and local embeddings to smartly correct data based on context.
+
+> ⚠️ **Prerequisite for ZeroEC:**
+> The embedding-based correction requires the `all-MiniLM-L6-v2` model.
+> 
+> 1. Visit the [ZeroEC Repository](https://github.com/YangChen32768/ZeroEC.git) or HuggingFace.
+> 2. Download the `all-MiniLM-L6-v2` folder.
+> 3. Place it within your local directory and point to it using the `embedding_model_path` parameter.
+
+### How to use:
+You need a dataset with missing values and a corresponding boolean mask (where 1 indicates observed values and 0 indicates missing values).
+
+```bash
+import pandas as pd
+from dataprep.tabular.correction.ZeroEC import ZeroEC
+
+# 1. Initialize Corrector
+corrector = ZeroEC(
+    model_name="qwen2.5-7b",
+    openai_api_base="http://localhost:8000/v1",
+    openai_api_key="YOUR_API_KEY",
+    dirty_data_path="datasets/dirty_data.csv",
+    detection_path="datasets/generated_error_mask.csv", # The mask from the Detection step
+    embedding_model_path="path/to/all-MiniLM-L6-v2",    # Path to downloaded embeddings
+    output_dir="./runs_output",
+    prompt_dir="dataprep/tabular/correction/prompt_templates",
+    max_workers=3
+)
+
+# 2. Run Correction Pipeline
+# The model will target only the cells flagged as True in the detection path
+cleaned_df = corrector.train_and_predict()
+
+# 3. Save Corrected Data
+cleaned_df.to_csv('final_corrected_data.csv')
+```

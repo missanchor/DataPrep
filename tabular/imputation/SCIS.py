@@ -10,9 +10,9 @@ class SCIS(BaseImputer):
                  alpha=100,
                  value=2,
                  epoch=100,
-                 epsilon=1.4,
+                 epsilon=3.0,
                  thre_value=0.001,
-                 initial_value=20000,
+                 initial_value=500,
                  guarantee=0.95,
                  device=None):
         self.batch_size = batch_size

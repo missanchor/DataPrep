@@ -40,7 +40,6 @@ class VAEGAIN(BaseImputer):
         norm_data_x = np.nan_to_num(norm_data, 0)
 
         # 2. 网络结构参数
-        # 对应原代码的 hidden layer 设置
         enc_h1, enc_h2 = 50, 20
         dec_h1, dec_h2 = 50, 20
 

@@ -502,6 +502,7 @@ def kb_gen_prompt(attr_name, dataset_name, idx_list, dirty_csv, attr_analy_conte
     # Examples
     examples = []
     for idx in idx_list[:20]:
+        dirty_csv = dirty_csv.reset_index(drop=True)
         examples.append(str(dirty_csv.loc[int(idx), :].to_dict()))
     prompt += f'\n\nExamples:\n' + '\n'.join(examples)
 
