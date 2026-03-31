@@ -127,3 +127,7 @@ cleaned_df = corrector.train_and_predict()
 # 3. Save Corrected Data
 cleaned_df.to_csv('final_corrected_data.csv')
 ```
+
+## 🖥️ Interactive Web Console
+
+If you prefer to use DataPrep via an interactive graphical interface, please navigate to the `console/` directory and refer to the **DataPrep Console User Manual** for detailed setup and usage instructions.

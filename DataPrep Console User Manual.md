@@ -24,7 +24,7 @@ Performs high-precision imputation for missing values in large-scale tabular dat
 * **Evaluation Metrics**: RMSE (Root Mean Square Error), MAE (Mean Absolute Error).
 * Note: You can click the `Method` to change the algorithm
   
-  <img src="imputation.png" width="80%" />
+  <img src="images/imputation.png" width="80%" />
 ### 2.2 Error/Anomaly Detection
 Automatically locates potential dirty data or erroneous cells within large-scale tables.
 * **Supported Algorithms**:
@@ -35,7 +35,7 @@ Automatically locates potential dirty data or erroneous cells within large-scale
     * `Error Detection Path`: The true error location mask (Ground Truth, used to calculate evaluation metrics).
 * **Evaluation Metrics**: Precision, Recall, F1-Score.
 
-  <img src="detection.png" width="80%" />
+  <img src="images/detection.png" width="80%" />
 
 ### 2.3 Data Correction
 Repairs dirty data into correct data given the completely true error locations (Ground Truth Error Mask).
@@ -49,7 +49,7 @@ Repairs dirty data into correct data given the completely true error locations (
     * `Embedding Model Path` & `Prompt Dir`: Dependency paths for the language model and prompt templates.
 * **Evaluation Metrics**: Precision, Recall, F1-Score.
 
-  <img src="correction.png" width="80%" />
+  <img src="images/correction.png" width="80%" />
 
 ---
 
@@ -58,19 +58,19 @@ Repairs dirty data into correct data given the completely true error locations (
 ### 3.1 Data Profiling and Preview
 After entering the data path, click the **"🔍 Analyze"** button, and the system will call the backend API for data exploration:
   <p style="margin-left: 20px; margin-right: 50px;">
-  <img src="profile_button.png" width="40%" /></p>
+  <img src="images/profile_button.png" width="40%" /></p>
 
 * **Field Statistics Overview**: Automatically identifies numerical and categorical fields, calculating the number of missing values, mean, standard deviation, extreme values, and the number of unique values.
 * **Dynamic Data Preview**: Provides a scrolling preview of up to the **Top 1000 rows** of the raw data. Missing values (`NaN`) are automatically highlighted in red and italicized.
   
-  <img src="data_profile.png" width="80%" />
+  <img src="images/data_profile.png" width="80%" />
 
 ### 3.2 Dynamic Hyperparameter Configuration
 When selecting different algorithms, the console automatically renders the corresponding hyperparameter input form.
 * Supports numerical and text inputs, as well as boolean (Checkbox) toggles.
 * For example, in `ZeroEC`, you can directly configure parameters like the LLM API Key and the number of concurrent threads (`max_workers`).
 
-  <img src="zeroec_hyperparameters.png" width="80%"  alt="zeroec_hyperparameters"/>
+  <img src="images/zeroec_hyperparameters.png" width="80%"  alt="zeroec_hyperparameters"/>
 
 ### 3.3 Real-time Logs and Progress Monitoring
 After clicking Run, the system establishes a persistent connection via WebSocket:
@@ -78,7 +78,7 @@ After clicking Run, the system establishes a persistent connection via WebSocket
 * **Loss Monitoring**: Parses and displays training metrics like `G_Loss`(Generator loss, measuring how realistic the imputed data is), `D_Loss`(Discriminator loss, measuring the ability to distinguish real vs. generated data), and `MSE` in real-time.
 * **Console Output**: Fully captures the backend's `stdout` and `stderr`, providing highlighted color prompts upon execution completion or when exceptions are thrown.
   
-  <img src="log.png" width="80%" />
+  <img src="images/log.png" width="80%" />
 
 ### 3.4 Evaluation Dashboard and Result Export
 After a task executes successfully, the results panel will automatically slide out at the bottom of the page:
@@ -87,7 +87,7 @@ After a task executes successfully, the results panel will automatically slide o
 * **Processed Data Preview**: Displays the data after algorithm processing (up to 1000 rows). **Cells that the algorithm actually imputed, detected as errors, or corrected will be highlighted in red.**
 * **One-Click Download**: Click the "Download" button to export and save the corrected dataset or Error Mask (where `True` indicates a cell detected as an error, and `False` indicates a correct cell) as a local CSV file.
 
-  <img src="evaluation.png" width="80%" />
+  <img src="images/evaluation.png" width="80%" />
 ---
 
 ## 4. Local Startup Guide
