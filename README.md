@@ -130,4 +130,4 @@ cleaned_df.to_csv('final_corrected_data.csv')
 
 ## 🖥️ Interactive Web Console
 
-If you prefer to use DataPrep via an interactive graphical interface, please navigate to the `console/` directory and refer to the **DataPrep Console User Manual** for detailed setup and usage instructions.
+If you prefer to use DataPrep via an interactive graphical interface, please refer to the **DataPrep Console User Manual**.md for detailed setup and usage instructions.
