@@ -41,8 +41,8 @@ import pandas as pd
 from dataprep.tabular.imputation.GAIN import GAIN
 
 # 1. Load Data and Mask (NumPy arrays expected)
-data_missing = pd.read_csv('datasets/data_missing.csv').values
-missing_mask = pd.read_csv('datasets/missing_mask.csv').values
+data_missing = pd.read_csv('datasets/imputation/weather_raw.csv').values
+missing_mask = pd.read_csv('datasets/imputation/weather_missing_mask.csv').values
 
 # 2. Initialize the Model
 # You can swap GAIN with VAEGAIN or SCIS
@@ -72,7 +72,7 @@ import pandas as pd
 from dataprep.tabular.detection.ZeroED import ZeroED
 
 # 1. Load Dirty Data
-df_raw = pd.read_csv('datasets/dirty_data.csv')
+df_raw = pd.read_csv('datasets/detection/rayyan_dirty_100.csv')
 
 # 2. Initialize Detector
 detector = ZeroED(
@@ -109,16 +109,18 @@ from dataprep.tabular.correction.ZeroEC import ZeroEC
 
 # 1. Initialize Corrector
 corrector = ZeroEC(
-    model_name="qwen2.5-7b",
-    openai_api_base="http://localhost:8000/v1",
-    openai_api_key="YOUR_API_KEY",
-    dirty_data_path="datasets/dirty_data.csv",
-    detection_path="datasets/generated_error_mask.csv", # The mask from the Detection step
-    embedding_model_path="path/to/all-MiniLM-L6-v2",    # Path to downloaded embeddings
-    output_dir="./runs_output",
-    prompt_dir="dataprep/tabular/correction/prompt_templates",
-    max_workers=3
-)
+        model_name="qwen2.5-7b",
+        openai_api_base="http://localhost:8000/v1",
+        openai_api_key="EMPTY",
+        embedding_model_path=f'tabular/correction/all-MiniLM-L6-v2',
+        human_repair_num=10,
+        output_dir=f'./runs_output',
+        clean_data_path="datasets/detection/rayyan_clean_100.csv",
+        dirty_data_path="datasets/detection/rayyan_dirty_100.csv",
+        detection_path="datasets/detection/rayyan_dirty_error_detection_100.csv",
+        prompt_dir=f'{BASE_DIR}/prompt_templates',
+        max_workers=3
+    )
 
 # 2. Run Correction Pipeline
 # The model will target only the cells flagged as True in the detection path

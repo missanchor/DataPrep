@@ -23,7 +23,7 @@ Performs high-precision imputation for missing values in large-scale tabular dat
     * `Ground Truth Path`: The complete, clean dataset used to evaluate imputation performance.
 * **Evaluation Metrics**: RMSE (Root Mean Square Error), MAE (Mean Absolute Error).
 * Note: You can click the `Method` to change the algorithm
-  
+
   <img src="images/imputation.png" width="80%" />
 ### 2.2 Error/Anomaly Detection
 Automatically locates potential dirty data or erroneous cells within large-scale tables.
@@ -62,7 +62,7 @@ After entering the data path, click the **"🔍 Analyze"** button, and the syste
 
 * **Field Statistics Overview**: Automatically identifies numerical and categorical fields, calculating the number of missing values, mean, standard deviation, extreme values, and the number of unique values.
 * **Dynamic Data Preview**: Provides a scrolling preview of up to the **Top 1000 rows** of the raw data. Missing values (`NaN`) are automatically highlighted in red and italicized.
-  
+
   <img src="images/data_profile.png" width="80%" />
 
 ### 3.2 Dynamic Hyperparameter Configuration
@@ -77,8 +77,10 @@ After clicking Run, the system establishes a persistent connection via WebSocket
 * **Progress Bar Display**: Provides a visual Epoch/Step progress bar for long-running deep learning training tasks.
 * **Loss Monitoring**: Parses and displays training metrics like `G_Loss`(Generator loss, measuring how realistic the imputed data is), `D_Loss`(Discriminator loss, measuring the ability to distinguish real vs. generated data), and `MSE` in real-time.
 * **Console Output**: Fully captures the backend's `stdout` and `stderr`, providing highlighted color prompts upon execution completion or when exceptions are thrown.
-  
-  <img src="images/log.png" width="80%" />
+
+  <img src="images/imputation_log.png" width="80%" />
+  <img src="images/detection_log.png" width="80%" />
+  <img src="images/correction_log.png" width="80%" />
 
 ### 3.4 Evaluation Dashboard and Result Export
 After a task executes successfully, the results panel will automatically slide out at the bottom of the page:

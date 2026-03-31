@@ -1,0 +1,285 @@
+Analysis Results for id
+==================================================
+
+
+=== Data Distribution Analysis Function 1 ===
+def distr_analysis_id(dirty_csv, attr_name):
+    # Check for missing values and unique values
+    missing_values = dirty_csv[attr_name].isnull().sum()
+    unique_values = dirty_csv[attr_name].unique()
+    
+    # Count top 10 frequent values
+    value_counts = Counter(dirty_csv[attr_name])
+    top_10_values = value_counts.most_common(10)
+    
+    result = f"Analysis of attribute '{attr_name}':\n"
+    result += f"Missing values: {missing_values}\n"
+    result += f"Unique values: {len(unique_values)}\n"
+    result += f"Top 10 frequent values:\n"
+    for value, count in top_10_values:
+        result += f"  {value}: {count}\n"
+    
+    return result
+
+**Running Results:**
+Analysis of attribute 'id':
+Missing values: 0
+Unique values: 99
+Top 10 frequent values:
+  235295: 1
+  498345: 1
+  789958: 1
+  169865: 1
+  803653: 1
+  98234: 1
+  823730: 1
+  729712: 1
+  396821: 1
+  340222: 1
+
+
+=== Data Distribution Analysis Function 2 ===
+def distr_analysis_article_title(dirty_csv, attr_name):
+    # Check for missing values and unique values
+    missing_values = dirty_csv[attr_name].isnull().sum()
+    unique_values = dirty_csv[attr_name].unique()
+    
+    # Count top 10 frequent values
+    value_counts = Counter(dirty_csv[attr_name])
+    top_10_values = value_counts.most_common(10)
+    
+    result = f"Analysis of attribute '{attr_name}':\n"
+    result += f"Missing values: {missing_values}\n"
+    result += f"Unique values: {len(unique_values)}\n"
+    result += f"Top 10 frequent values:\n"
+    for value, count in top_10_values:
+        result += f"  {value[:50]}...: {count}\n"  # Truncate long titles
+    
+    return result
+
+**Running Results:**
+Error executing function: 'int' object is not subscriptable
+
+=== Data Distribution Analysis Function 3 ===
+def distr_analysis_article_language(dirty_csv, attr_name):
+    # Check for missing values and unique values
+    missing_values = dirty_csv[attr_name].isnull().sum()
+    unique_values = dirty_csv[attr_name].unique()
+    
+    # Count top 10 frequent values
+    value_counts = Counter(dirty_csv[attr_name])
+    top_10_values = value_counts.most_common(10)
+    
+    result = f"Analysis of attribute '{attr_name}':\n"
+    result += f"Missing values: {missing_values}\n"
+    result += f"Unique values: {len(unique_values)}\n"
+    result += f"Top 10 frequent values:\n"
+    for value, count in top_10_values:
+        result += f"  {value}: {count}\n"
+    
+    return result
+
+**Running Results:**
+Analysis of attribute 'id':
+Missing values: 0
+Unique values: 99
+Top 10 frequent values:
+  235295: 1
+  498345: 1
+  789958: 1
+  169865: 1
+  803653: 1
+  98234: 1
+  823730: 1
+  729712: 1
+  396821: 1
+  340222: 1
+
+
+=== Data Distribution Analysis Function 4 ===
+def distr_analysis_journal_title(dirty_csv, attr_name):
+    # Check for missing values and unique values
+    missing_values = dirty_csv[attr_name].isnull().sum()
+    unique_values = dirty_csv[attr_name].unique()
+    
+    # Count top 10 frequent values
+    value_counts = Counter(dirty_csv[attr_name])
+    top_10_values = value_counts.most_common(10)
+    
+    result = f"Analysis of attribute '{attr_name}':\n"
+    result += f"Missing values: {missing_values}\n"
+    result += f"Unique values: {len(unique_values)}\n"
+    result += f"Top 10 frequent values:\n"
+    for value, count in top_10_values:
+        result += f"  {value[:50]}...: {count}\n"  # Truncate long titles
+    
+    return result
+
+**Running Results:**
+Error executing function: 'int' object is not subscriptable
+
+=== Data Distribution Analysis Function 5 ===
+def distr_analysis_journal_abbreviation(dirty_csv, attr_name):
+    # Check for missing values and unique values
+    missing_values = dirty_csv[attr_name].isnull().sum()
+    unique_values = dirty_csv[attr_name].unique()
+    
+    # Count top 10 frequent values
+    value_counts = Counter(dirty_csv[attr_name])
+    top_10_values = value_counts.most_common(10)
+    
+    result = f"Analysis of attribute '{attr_name}':\n"
+    result += f"Missing values: {missing_values}\n"
+    result += f"Unique values: {len(unique_values)}\n"
+    result += f"Top 10 frequent values:\n"
+    for value, count in top_10_values:
+        result += f"  {value}: {count}\n"
+    
+    return result
+
+**Running Results:**
+Analysis of attribute 'id':
+Missing values: 0
+Unique values: 99
+Top 10 frequent values:
+  235295: 1
+  498345: 1
+  789958: 1
+  169865: 1
+  803653: 1
+  98234: 1
+  823730: 1
+  729712: 1
+  396821: 1
+  340222: 1
+
+
+=== Data Distribution Analysis Function 6 ===
+def distr_analysis_article_jvolumn(dirty_csv, attr_name):
+    # Check for missing values and unique values
+    missing_values = dirty_csv[attr_name].isnull().sum()
+    unique_values = dirty_csv[attr_name].unique()
+    
+    # Count top 10 frequent values
+    value_counts = Counter(dirty_csv[attr_name])
+    top_10_values = value_counts.most_common(10)
+    
+    result = f"Analysis of attribute '{attr_name}':\n"
+    result += f"Missing values: {missing_values}\n"
+    result += f"Unique values: {len(unique_values)}\n"
+    result += f"Top 10 frequent values:\n"
+    for value, count in top_10_values:
+        result += f"  {value}: {count}\n"
+    
+    return result
+
+**Running Results:**
+Analysis of attribute 'id':
+Missing values: 0
+Unique values: 99
+Top 10 frequent values:
+  235295: 1
+  498345: 1
+  789958: 1
+  169865: 1
+  803653: 1
+  98234: 1
+  823730: 1
+  729712: 1
+  396821: 1
+  340222: 1
+
+
+=== Data Distribution Analysis Function 7 ===
+def distr_analysis_article_jissue(dirty_csv, attr_name):
+    # Check for missing values and unique values
+    missing_values = dirty_csv[attr_name].isnull().sum()
+    unique_values = dirty_csv[attr_name].unique()
+    
+    # Count top 10 frequent values
+    value_counts = Counter(dirty_csv[attr_name])
+    top_10_values = value_counts.most_common(10)
+    
+    result = f"Analysis of attribute '{attr_name}':\n"
+    result += f"Missing values: {missing_values}\n"
+    result += f"Unique values: {len(unique_values)}\n"
+    result += f"Top 10 frequent values:\n"
+    for value, count in top_10_values:
+        result += f"  {value}: {count}\n"
+    
+    return result
+
+**Running Results:**
+Analysis of attribute 'id':
+Missing values: 0
+Unique values: 99
+Top 10 frequent values:
+  235295: 1
+  498345: 1
+  789958: 1
+  169865: 1
+  803653: 1
+  98234: 1
+  823730: 1
+  729712: 1
+  396821: 1
+  340222: 1
+
+
+=== Data Distribution Analysis Function 8 ===
+def distr_analysis_article_pagination(dirty_csv, attr_name):
+    # Check for missing values and unique values
+    missing_values = dirty_csv[attr_name].isnull().sum()
+    unique_values = dirty_csv[attr_name].unique()
+    
+    # Count top 10 frequent values
+    value_counts = Counter(dirty_csv[attr_name])
+    top_10_values = value_counts.most_common(10)
+    
+    result = f"Analysis of attribute '{attr_name}':\n"
+    result += f"Missing values: {missing_values}\n"
+    result += f"Unique values: {len(unique_values)}\n"
+    result += f"Top 10 frequent values:\n"
+    for value, count in top_10_values:
+        result += f"  {value}: {count}\n"
+    
+    return result
+
+**Running Results:**
+Analysis of attribute 'id':
+Missing values: 0
+Unique values: 99
+Top 10 frequent values:
+  235295: 1
+  498345: 1
+  789958: 1
+  169865: 1
+  803653: 1
+  98234: 1
+  823730: 1
+  729712: 1
+  396821: 1
+  340222: 1
+
+
+=== Data Distribution Analysis Function 9 ===
+def distr_analysis_author_list(dirty_csv, attr_name):
+    # Check for missing values and unique values
+    missing_values = dirty_csv[attr_name].isnull().sum()
+    unique_values = dirty_csv[attr_name].unique()
+    
+    # Count top 10 frequent authors
+    author_counts = Counter([author for row in dirty_csv[attr_name] for author in eval(row)])
+    top_10_authors = author_counts.most_common(10)
+    
+    result = f"Analysis of attribute '{attr_name}':\n"
+    result += f"Missing values: {missing_values}\n"
+    result += f"Unique values: {len(unique_values)}\n"
+    result += f"Top 10 frequent authors:\n"
+    for author, count in top_10_authors:
+        result += f"  {author}: {count}\n"
+    
+    return result
+
+**Running Results:**
+Error executing function: eval() arg 1 must be a string, bytes or code object
