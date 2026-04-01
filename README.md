@@ -14,7 +14,7 @@ conda activate dataprep
 
 ### 2. Clone the Repository
 ```bash
-git clone https://github.com/missanchor/DataPrep.git
+git clone [https://github.com/missanchor/DataPrep.git](https://github.com/missanchor/DataPrep.git)
 cd DataPrep
 ```
 
@@ -76,12 +76,14 @@ df_raw = pd.read_csv('datasets/detection/rayyan_dirty_100.csv')
 
 # 2. Initialize Detector
 detector = ZeroED(
-    model_name="qwen2.5-7b", 
-    api_use=True,
-    base_url="http://localhost:8000/v1", # Your LLM API endpoint
-    api_key="YOUR_API_KEY",
-    n_method="agglomerative"
-)
+        api_key='EMPTY',
+        model_name="qwen2.5-7b",
+        base_url="http://localhost:8000/v1",
+        local_model_use=True,
+        n_method='dbscan',  # 或者 'agglomerative'
+        result_dir='./temp_zeroed_results',
+        verbose=False
+    )
 
 # 3. Train and Predict 
 error_mask = detector.train_and_predict(df_raw) # Returns a boolean matrix
@@ -95,7 +97,7 @@ Once errors are detected, this module repairs the specific dirty cells. ZeroEC u
 
 > ⚠️ **Prerequisite for ZeroEC:**
 > The embedding-based correction requires the `all-MiniLM-L6-v2` model.
-> 
+>
 > 1. Visit the [ZeroEC Repository](https://github.com/YangChen32768/ZeroEC.git) or HuggingFace.
 > 2. Download the `all-MiniLM-L6-v2` folder.
 > 3. Place it within your local directory and point to it using the `embedding_model_path` parameter.
@@ -130,6 +132,48 @@ cleaned_df = corrector.train_and_predict()
 cleaned_df.to_csv('final_corrected_data.csv')
 ```
 
+## 📊 Performance Comparison
+As demonstrated in the benchmark results below, DataPrep's advanced algorithms consistently outperform traditional `scikit-learn` baselines across most data governance scenarios.
+**Table 1: Imputation Performance Comparison (RMSE)**
+
+| Algorithm | Weather | California | Kin8nm |
+| :--- | :---: | :---: | :---: |
+| **MICE** | 12.2531 | 546.3955 | 1.1907 |
+| **MissF** | 10.9410 | 395.1089 | 0.9244 |
+| **GAIN** | 10.5331 | 411.5608 | 0.9722 |
+| **VAE-GAIN** | 10.2109 | 406.7808 | 0.8606 |
+| **SCIS-GAIN** | 10.2650 | 389.6532 | 0.8904 |
+> *Note: The values above represent the RMSE (Root Mean Square Error) performance of each algorithm on the corresponding datasets.*
+
+<br>
+
+**Table 2: Error Detection Performance Comparison**
+
+| Algorithm | Metric | Flights | Tax | Rayyan |
+| :--- | :--- | :---: | :---: | :---: |
+| **ZeroED (LLM)** | F1-Score | 0.8392 | 0.6762 | 0.8559 |
+| | Precision | 0.8535 | 0.5236 | 0.7725 |
+| | Recall | 0.8277 | 0.9573 | 0.9608 |
+| **LOF** | F1-Score | 0.6332 | 0.5015 | 0.6028 |
+| | Precision | 0.8241 | 0.5133 | 0.768 |
+| | Recall | 0.5142 | 0.4902 | 0.4961 |
+| **Isolation Forest**| F1-Score | 0.5755 | 0.4793 | 0.6279 |
+| | Precision | 0.7489 | 0.4907 | 0.8 |
+| | Recall | 0.4673 | 0.4685 | 0.5168 |
+> *Note: The values above represent the F1-Score, Precision, and Recall performance of each detection algorithm on the corresponding datasets.*
+
+<br>
+
+**Table 3: Data Correction Performance Comparison**
+
+| Algorithm | Rayyan | Flights | Tax |
+| :--- | :---: | :---: | :---: |
+| **Sklearn (Mode)** | 0 | 0.0152 | 0 |
+| **Sklearn (KNN)** | 0 | 0.0543 | 0 |
+| **Sklearn (Iterative)** | 0 | 0.0467 | 0 |
+| **ZeroEC (LLM)** | 0.5468 | 0.9779 | 0.2716 |
+> *Note: Accuracy represents the proportion of correctly repaired cells strictly among those flagged as errors by the detection mask. A higher value indicates a stronger capability to restore dirty data to its ground truth.*
+
 ## 🖥️ Interactive Web Console
 
-If you prefer to use DataPrep via an interactive graphical interface, please refer to the **DataPrep Console User Manual**.md for detailed setup and usage instructions.
+If you prefer to use DataPrep via an interactive graphical interface, please refer to the **DataPrep Console User Manual.md** for detailed setup and usage instructions.

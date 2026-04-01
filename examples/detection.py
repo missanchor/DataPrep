@@ -63,7 +63,7 @@ if __name__ == "__main__":  # 注意：这里必须是双下划线
         model_name="qwen2.5-7b",
         base_url="http://localhost:8000/v1",
         local_model_use=True,
-        n_method='kmeans',
+        n_method='dbscan',
         result_dir='./temp',
         verbose=True
     )

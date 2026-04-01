@@ -3,283 +3,107 @@ Analysis Results for id
 
 
 === Data Distribution Analysis Function 1 ===
-def distr_analysis_id(dirty_csv, attr_name):
-    # Check for missing values and unique values
-    missing_values = dirty_csv[attr_name].isnull().sum()
-    unique_values = dirty_csv[attr_name].unique()
+def distr_analysis_missing_values(dirty_csv, attr_name):
+    if attr_name not in dirty_csv.columns:
+        return f"Attribute {attr_name} does not exist in the dataset."
     
-    # Count top 10 frequent values
-    value_counts = Counter(dirty_csv[attr_name])
-    top_10_values = value_counts.most_common(10)
+    missing_count = dirty_csv[attr_name].isnull().sum()
+    missing_percentage = (missing_count / len(dirty_csv)) * 100
     
-    result = f"Analysis of attribute '{attr_name}':\n"
-    result += f"Missing values: {missing_values}\n"
-    result += f"Unique values: {len(unique_values)}\n"
-    result += f"Top 10 frequent values:\n"
-    for value, count in top_10_values:
-        result += f"  {value}: {count}\n"
+    result = f"Analysis of missing values in {attr_name}:\n"
+    result += f"Total records: {len(dirty_csv)}\n"
+    result += f"Missing records: {missing_count} ({missing_percentage:.2f}%)\n"
+    result += f"Representative missing values: {dirty_csv[dirty_csv[attr_name].isnull()][attr_name].head(5).tolist()}"
     
     return result
 
 **Running Results:**
-Analysis of attribute 'id':
-Missing values: 0
-Unique values: 99
-Top 10 frequent values:
-  235295: 1
-  498345: 1
-  789958: 1
-  169865: 1
-  803653: 1
-  98234: 1
-  823730: 1
-  729712: 1
-  396821: 1
-  340222: 1
-
+Analysis of missing values in id:
+Total records: 99
+Missing records: 0 (0.00%)
+Representative missing values: []
 
 === Data Distribution Analysis Function 2 ===
-def distr_analysis_article_title(dirty_csv, attr_name):
-    # Check for missing values and unique values
-    missing_values = dirty_csv[attr_name].isnull().sum()
-    unique_values = dirty_csv[attr_name].unique()
+def distr_analysis_duplicates(dirty_csv, attr_name):
+    if attr_name not in dirty_csv.columns:
+        return f"Attribute {attr_name} does not exist in the dataset."
     
-    # Count top 10 frequent values
-    value_counts = Counter(dirty_csv[attr_name])
-    top_10_values = value_counts.most_common(10)
+    duplicate_count = dirty_csv.duplicated(subset=[attr_name]).sum()
     
-    result = f"Analysis of attribute '{attr_name}':\n"
-    result += f"Missing values: {missing_values}\n"
-    result += f"Unique values: {len(unique_values)}\n"
-    result += f"Top 10 frequent values:\n"
-    for value, count in top_10_values:
-        result += f"  {value[:50]}...: {count}\n"  # Truncate long titles
+    result = f"Analysis of duplicate values in {attr_name}:\n"
+    result += f"Total records: {len(dirty_csv)}\n"
+    result += f"Duplicate records: {duplicate_count}\n"
+    result += f"Representative duplicate values: {dirty_csv[dirty_csv.duplicated(subset=[attr_name], keep=False)][attr_name].head(5).tolist()}"
     
     return result
 
 **Running Results:**
-Error executing function: 'int' object is not subscriptable
+Analysis of duplicate values in id:
+Total records: 99
+Duplicate records: 0
+Representative duplicate values: []
 
 === Data Distribution Analysis Function 3 ===
-def distr_analysis_article_language(dirty_csv, attr_name):
-    # Check for missing values and unique values
-    missing_values = dirty_csv[attr_name].isnull().sum()
+def distr_analysis_data_types(dirty_csv, attr_name):
+    if attr_name not in dirty_csv.columns:
+        return f"Attribute {attr_name} does not exist in the dataset."
+    
+    data_type = dirty_csv[attr_name].dtype
     unique_values = dirty_csv[attr_name].unique()
     
-    # Count top 10 frequent values
-    value_counts = Counter(dirty_csv[attr_name])
-    top_10_values = value_counts.most_common(10)
-    
-    result = f"Analysis of attribute '{attr_name}':\n"
-    result += f"Missing values: {missing_values}\n"
+    result = f"Analysis of data types and unique values in {attr_name}:\n"
+    result += f"Data type: {data_type}\n"
     result += f"Unique values: {len(unique_values)}\n"
-    result += f"Top 10 frequent values:\n"
-    for value, count in top_10_values:
-        result += f"  {value}: {count}\n"
+    result += f"Representative unique values: {unique_values[:5].tolist()}"
     
     return result
 
 **Running Results:**
-Analysis of attribute 'id':
-Missing values: 0
+Analysis of data types and unique values in id:
+Data type: int64
 Unique values: 99
-Top 10 frequent values:
-  235295: 1
-  498345: 1
-  789958: 1
-  169865: 1
-  803653: 1
-  98234: 1
-  823730: 1
-  729712: 1
-  396821: 1
-  340222: 1
-
+Representative unique values: [235295, 498345, 789958, 169865, 803653]
 
 === Data Distribution Analysis Function 4 ===
-def distr_analysis_journal_title(dirty_csv, attr_name):
-    # Check for missing values and unique values
-    missing_values = dirty_csv[attr_name].isnull().sum()
-    unique_values = dirty_csv[attr_name].unique()
+def distr_analysis_outliers(dirty_csv, attr_name):
+    if attr_name not in dirty_csv.columns or dirty_csv[attr_name].dtype != 'float64':
+        return f"Attribute {attr_name} does not exist or is not numeric in the dataset."
     
-    # Count top 10 frequent values
-    value_counts = Counter(dirty_csv[attr_name])
-    top_10_values = value_counts.most_common(10)
+    q1 = dirty_csv[attr_name].quantile(0.25)
+    q3 = dirty_csv[attr_name].quantile(0.75)
+    iqr = q3 - q1
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
     
-    result = f"Analysis of attribute '{attr_name}':\n"
-    result += f"Missing values: {missing_values}\n"
-    result += f"Unique values: {len(unique_values)}\n"
-    result += f"Top 10 frequent values:\n"
-    for value, count in top_10_values:
-        result += f"  {value[:50]}...: {count}\n"  # Truncate long titles
+    outliers = dirty_csv[(dirty_csv[attr_name] < lower_bound) | (dirty_csv[attr_name] > upper_bound)]
+    
+    result = f"Analysis of outliers in {attr_name}:\n"
+    result += f"Lower bound: {lower_bound}\n"
+    result += f"Upper bound: {upper_bound}\n"
+    result += f"Number of outliers: {len(outliers)}\n"
+    result += f"Representative outliers: {outliers[attr_name].head(5).tolist()}"
     
     return result
 
 **Running Results:**
-Error executing function: 'int' object is not subscriptable
+Attribute id does not exist or is not numeric in the dataset.
 
 === Data Distribution Analysis Function 5 ===
-def distr_analysis_journal_abbreviation(dirty_csv, attr_name):
-    # Check for missing values and unique values
-    missing_values = dirty_csv[attr_name].isnull().sum()
-    unique_values = dirty_csv[attr_name].unique()
+def distr_analysis_abbreviations(dirty_csv, attr_name):
+    if attr_name not in dirty_csv.columns:
+        return f"Attribute {attr_name} does not exist in the dataset."
     
-    # Count top 10 frequent values
-    value_counts = Counter(dirty_csv[attr_name])
-    top_10_values = value_counts.most_common(10)
+    # Assuming jounral_abbreviation is the column to check
+    if attr_name != 'jounral_abbreviation':
+        return f"Attribute {attr_name} is not the correct column for abbreviation checks."
     
-    result = f"Analysis of attribute '{attr_name}':\n"
-    result += f"Missing values: {missing_values}\n"
-    result += f"Unique values: {len(unique_values)}\n"
-    result += f"Top 10 frequent values:\n"
-    for value, count in top_10_values:
-        result += f"  {value}: {count}\n"
+    unique_abbreviations = dirty_csv[attr_name].unique()
+    
+    result = f"Analysis of abbreviations in {attr_name}:\n"
+    result += f"Unique abbreviations: {len(unique_abbreviations)}\n"
+    result += f"Representative unique abbreviations: {unique_abbreviations[:5].tolist()}"
     
     return result
 
 **Running Results:**
-Analysis of attribute 'id':
-Missing values: 0
-Unique values: 99
-Top 10 frequent values:
-  235295: 1
-  498345: 1
-  789958: 1
-  169865: 1
-  803653: 1
-  98234: 1
-  823730: 1
-  729712: 1
-  396821: 1
-  340222: 1
-
-
-=== Data Distribution Analysis Function 6 ===
-def distr_analysis_article_jvolumn(dirty_csv, attr_name):
-    # Check for missing values and unique values
-    missing_values = dirty_csv[attr_name].isnull().sum()
-    unique_values = dirty_csv[attr_name].unique()
-    
-    # Count top 10 frequent values
-    value_counts = Counter(dirty_csv[attr_name])
-    top_10_values = value_counts.most_common(10)
-    
-    result = f"Analysis of attribute '{attr_name}':\n"
-    result += f"Missing values: {missing_values}\n"
-    result += f"Unique values: {len(unique_values)}\n"
-    result += f"Top 10 frequent values:\n"
-    for value, count in top_10_values:
-        result += f"  {value}: {count}\n"
-    
-    return result
-
-**Running Results:**
-Analysis of attribute 'id':
-Missing values: 0
-Unique values: 99
-Top 10 frequent values:
-  235295: 1
-  498345: 1
-  789958: 1
-  169865: 1
-  803653: 1
-  98234: 1
-  823730: 1
-  729712: 1
-  396821: 1
-  340222: 1
-
-
-=== Data Distribution Analysis Function 7 ===
-def distr_analysis_article_jissue(dirty_csv, attr_name):
-    # Check for missing values and unique values
-    missing_values = dirty_csv[attr_name].isnull().sum()
-    unique_values = dirty_csv[attr_name].unique()
-    
-    # Count top 10 frequent values
-    value_counts = Counter(dirty_csv[attr_name])
-    top_10_values = value_counts.most_common(10)
-    
-    result = f"Analysis of attribute '{attr_name}':\n"
-    result += f"Missing values: {missing_values}\n"
-    result += f"Unique values: {len(unique_values)}\n"
-    result += f"Top 10 frequent values:\n"
-    for value, count in top_10_values:
-        result += f"  {value}: {count}\n"
-    
-    return result
-
-**Running Results:**
-Analysis of attribute 'id':
-Missing values: 0
-Unique values: 99
-Top 10 frequent values:
-  235295: 1
-  498345: 1
-  789958: 1
-  169865: 1
-  803653: 1
-  98234: 1
-  823730: 1
-  729712: 1
-  396821: 1
-  340222: 1
-
-
-=== Data Distribution Analysis Function 8 ===
-def distr_analysis_article_pagination(dirty_csv, attr_name):
-    # Check for missing values and unique values
-    missing_values = dirty_csv[attr_name].isnull().sum()
-    unique_values = dirty_csv[attr_name].unique()
-    
-    # Count top 10 frequent values
-    value_counts = Counter(dirty_csv[attr_name])
-    top_10_values = value_counts.most_common(10)
-    
-    result = f"Analysis of attribute '{attr_name}':\n"
-    result += f"Missing values: {missing_values}\n"
-    result += f"Unique values: {len(unique_values)}\n"
-    result += f"Top 10 frequent values:\n"
-    for value, count in top_10_values:
-        result += f"  {value}: {count}\n"
-    
-    return result
-
-**Running Results:**
-Analysis of attribute 'id':
-Missing values: 0
-Unique values: 99
-Top 10 frequent values:
-  235295: 1
-  498345: 1
-  789958: 1
-  169865: 1
-  803653: 1
-  98234: 1
-  823730: 1
-  729712: 1
-  396821: 1
-  340222: 1
-
-
-=== Data Distribution Analysis Function 9 ===
-def distr_analysis_author_list(dirty_csv, attr_name):
-    # Check for missing values and unique values
-    missing_values = dirty_csv[attr_name].isnull().sum()
-    unique_values = dirty_csv[attr_name].unique()
-    
-    # Count top 10 frequent authors
-    author_counts = Counter([author for row in dirty_csv[attr_name] for author in eval(row)])
-    top_10_authors = author_counts.most_common(10)
-    
-    result = f"Analysis of attribute '{attr_name}':\n"
-    result += f"Missing values: {missing_values}\n"
-    result += f"Unique values: {len(unique_values)}\n"
-    result += f"Top 10 frequent authors:\n"
-    for author, count in top_10_authors:
-        result += f"  {author}: {count}\n"
-    
-    return result
-
-**Running Results:**
-Error executing function: eval() arg 1 must be a string, bytes or code object
+Attribute id is not the correct column for abbreviation checks.
