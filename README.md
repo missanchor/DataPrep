@@ -176,4 +176,4 @@ As demonstrated in the benchmark results below, DataPrep's advanced algorithms c
 
 ## 🖥️ Interactive Web Console
 
-If you prefer to use DataPrep via an interactive graphical interface, please refer to the **DataPrep Console User Manual.md** for detailed setup and usage instructions.
+If you prefer to use DataPrep via an interactive graphical interface, please refer to the [DataPrep Console User Manual](./DataPrep Console User Manual.md) for detailed setup and usage instructions.
