@@ -4,4 +4,6 @@ tabular/correction/all-MiniLM-L6-v2
 tabular/correction/runs_rayyan
 tabular/test/temp
 examples/temp
-utils.py
+runs_rayyan
+temp
+result
