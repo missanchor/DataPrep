@@ -23,8 +23,6 @@ from sklearn.neighbors import LocalOutlierFactor
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import f1_score, precision_score, recall_score
 
-import sys
-import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, "../"))
 if project_root not in sys.path:
@@ -172,6 +170,43 @@ def evaluate_correction_metrics(clean_data, dirty_data, corrected_data, df_mask)
     F1 = (2 * Precision * Recall) / (Precision + Recall) if (Precision + Recall) > 0 else 0.0
 
     return Precision, Recall, F1
+
+
+# ========== 新增：内存版 EDR 计算 ==========
+def calc_edr_df(dirty_df, repaired_df, clean_df):
+    """
+    模拟从CSV读取全字符串比较的效果，直接在内存中比较三个 DataFrame 的 EDR。
+    使用 Numpy 矩阵运算，防止 Pandas 索引不对齐产生的 NaN。
+    """
+    # 1. 强制对齐：取三个 DataFrame 的公共行和公共列
+    common_idx = clean_df.index.intersection(repaired_df.index).intersection(dirty_df.index)
+    common_col = clean_df.columns.intersection(repaired_df.columns).intersection(dirty_df.columns)
+
+    # 2. 提取对齐后的数据，处理空值并转为字符串
+    dirty_align = dirty_df.loc[common_idx, common_col].fillna("").astype(str)
+    rep_align = repaired_df.loc[common_idx, common_col].fillna("").astype(str)
+    clean_align = clean_df.loc[common_idx, common_col].fillna("").astype(str)
+
+    # 3. 提取底层 numpy 矩阵进行逻辑比较，绝对安全
+    dirty_arr = dirty_align.values
+    rep_arr = rep_align.values
+    clean_arr = clean_align.values
+
+    # 找到不相等的位置 (布尔矩阵)
+    dirty_wrong = (dirty_arr != clean_arr)
+    repaired_wrong = (rep_arr != clean_arr)
+
+    # 计算各项指标
+    d_w = int(dirty_wrong.sum())
+    dis_r2c = int(repaired_wrong.sum())
+    d_w2r = int((dirty_wrong & ~repaired_wrong).sum())
+    d_r2w = int((~dirty_wrong & repaired_wrong).sum())
+
+    if d_w == 0:
+        return 0.0
+    else:
+        edr = (d_w - dis_r2c) / d_w
+        return edr
 
 
 class WsLogCatcher:
@@ -357,9 +392,11 @@ async def websocket_endpoint(websocket: WebSocket):
                     print("Running Sklearn Baselines...")
                     res_mode = SklearnCorrector(strategy='most_frequent').correct(df_dirty, df_mask)
                     p_m, r_m, f1_m = evaluate_correction_metrics(df_clean, df_dirty, res_mode, df_mask)
+                    edr_m = calc_edr_df(df_dirty, res_mode, df_clean)  # 新增
 
                     res_knn = SklearnCorrector(strategy='knn').correct(df_dirty, df_mask)
                     p_k, r_k, f1_k = evaluate_correction_metrics(df_clean, df_dirty, res_knn, df_mask)
+                    edr_k = calc_edr_df(df_dirty, res_knn, df_clean)  # 新增
 
                     print("Running ZeroEC...")
                     params.update({
@@ -371,15 +408,19 @@ async def websocket_endpoint(websocket: WebSocket):
                         'prompt_dir': paths.get('promptDir')
                     })
                     zeroec = ZeroEC(**params)
-                    raw_corrected = zeroec.train_and_predict()
+                    df_corrected = zeroec.train_and_predict()
 
-                    df_corrected = df_dirty.mask(df_mask, raw_corrected)
                     p_o, r_o, f1_o = evaluate_correction_metrics(df_clean, df_dirty, df_corrected, df_mask)
+                    edr_o = calc_edr_df(df_dirty, df_corrected, df_clean)  # 新增
 
+                    # 输出新增的 edr
                     result = {
                         "cor_prec_mode": f"{p_m:.2%}", "cor_rec_mode": f"{r_m:.2%}", "cor_f1_mode": f"{f1_m:.2%}",
+                        "cor_edr_mode": f"{edr_m:.2%}",
                         "cor_prec_knn": f"{p_k:.2%}", "cor_rec_knn": f"{r_k:.2%}", "cor_f1_knn": f"{f1_k:.2%}",
+                        "cor_edr_knn": f"{edr_k:.2%}",
                         "cor_prec_ours": f"{p_o:.2%}", "cor_rec_ours": f"{r_o:.2%}", "cor_f1_ours": f"{f1_o:.2%}",
+                        "cor_edr_ours": f"{edr_o:.2%}",
                     }
 
                     result_data = generate_result_data(df_corrected, df_mask)
@@ -427,4 +468,4 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8088, reload=True)
+    uvicorn.run("dataprep.main:app", host="127.0.0.1", port=8088, reload=True)
